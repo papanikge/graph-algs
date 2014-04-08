@@ -69,17 +69,23 @@ bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums
     list<node> LN1, LN2;
     node_array<int> for_bfs(G, -1);
 
+    /* do we need to check a node from each SCC ?? */
     a = G.choose_node();
 
     /* Performing BFS on the original and on the reverse graph.*/
     LN1 = BFS(G, a, for_bfs);
-    forall(v, LN1)
-        orig_counter++;
+    forall(v, LN1) {
+        if (check_nums[a] == check_nums[v])
+            orig_counter++;
+    }
 
     G.rev_all_edges();
+    for_bfs.init(G, -1);
     LN2 = BFS(G, a, for_bfs);
-    forall(v, LN2)
-        rev_counter++;
+    forall(v, LN2) {
+        if (check_nums[a] == check_nums[v])
+            rev_counter++;
+    }
 
     /* Checking the summing of the found nodes. They need to be the same. */
     if (rev_counter == orig_counter) {
