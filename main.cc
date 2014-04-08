@@ -47,10 +47,10 @@ static void test_implementations(leda::graph& G, leda::node_array<int>& sccnum)
 
     T = leda::used_time();
     leda = leda::STRONG_COMPONENTS(G, sccnum);
-    std::cout << "LEDA Strong-Components:\t\t" << leda << " -- Time to calculate: " << leda::used_time(T) << std::endl;
+    std::cout << "\t\tLEDA Strong-Components: " << leda << " -- Time to calculate: " << leda::used_time(T) << std::endl;
     sccnum.init(G, 0);
     mine = my_STRONG_COMPONENTS(G, sccnum);
-    std::cout << "My Strong-Components:\t\t" << mine << " -- Time to calculate: " << leda::used_time(T) << std::endl;
+    std::cout << "\t\tMy   Strong-Components: " << mine << " -- Time to calculate: " << leda::used_time(T) << std::endl;
 }
 
 int main()
@@ -62,7 +62,7 @@ int main()
     leda::node t, s;
 
     // Testing our implementation with the checker.
-    std::cout << "\t>>> Checking implementation... " << std::endl;
+    std::cout << "!>>> Checking implementation... " << std::endl;
     leda::complete_graph(G, 100);
     s = G.choose_node();
     t = G.new_node();
@@ -72,11 +72,10 @@ int main()
     STRONG_COMPONENTS_checker(G, check_nums);
 
     // Random graphs.
-    std::cout << "\t>>> Random graphs... " << std::endl;
+    std::cout << "!>>> Random graphs... " << std::endl;
     for (i = 0; i < 3; i++) {
         e = N[i] * log(N[i]);
         leda::random_graph(G, N[i], e);
-        std::cout << "\t" << N[i] << " node graph generated" << std::endl;
         std::cout << "\tGraph generated. Nodes: " << N[i] << std::endl;
         leda::node_array<int> compnum(G, 0);
 
@@ -89,7 +88,7 @@ int main()
 
     // Cliqued graphs.
     N[0] = 10000;
-    std::cout << "\t>>> Cliqued graphs... " << std::endl;
+    std::cout << "!>>> Cliqued graphs... " << std::endl;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
             construct_cliqued_graph(G, K[j], N[i]);
