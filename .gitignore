@@ -1,0 +1,4 @@
+*.o
+run_this
+a.out
+*.so
