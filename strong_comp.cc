@@ -7,6 +7,7 @@
 //
 
 #include "basic.h"
+#include <LEDA/core/set.h>
 
 using namespace leda;
 
@@ -63,28 +64,34 @@ int my_STRONG_COMPONENTS(graph& G, node_array<int>& compnum)
  */
 bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums)
 {
+    node n, v;
+    set<int> S;
     int orig_counter = 0;
     int rev_counter  = 0;
-    node v, a;
     list<node> LN1, LN2;
-    node_array<int> for_bfs(G, -1);
 
-    /* do we need to check a node from each SCC ?? */
-    a = G.choose_node();
+    forall_nodes(n, G) {
+        /* we need to perform the test for one node in each clique */
+        if (S.member(check_nums[n]))
+            continue;
+        else
+            S.insert(check_nums[n]);
 
-    /* Performing BFS on the original and on the reverse graph.*/
-    LN1 = BFS(G, a, for_bfs);
-    forall(v, LN1) {
-        if (check_nums[a] == check_nums[v])
-            orig_counter++;
-    }
+        node_array<int> for_bfs(G, -1);
+        /* Performing BFS on the original and on the reverse graph.*/
+        LN1 = BFS(G, n, for_bfs);
+        forall(v, LN1) {
+            if (check_nums[n] == check_nums[v])
+                orig_counter++;
+        }
 
-    G.rev_all_edges();
-    for_bfs.init(G, -1);
-    LN2 = BFS(G, a, for_bfs);
-    forall(v, LN2) {
-        if (check_nums[a] == check_nums[v])
-            rev_counter++;
+        G.rev_all_edges();
+        for_bfs.init(G, -1);
+        LN2 = BFS(G, n, for_bfs);
+        forall(v, LN2) {
+            if (check_nums[n] == check_nums[v])
+                rev_counter++;
+        }
     }
 
     /* Checking the summing of the found nodes. They need to be the same. */
