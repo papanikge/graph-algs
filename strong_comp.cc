@@ -89,10 +89,10 @@ bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums
 
     /* Checking the summing of the found nodes. They need to be the same. */
     if (rev_counter == orig_counter) {
-        std::cout << "Check. Implementations match." << std::endl;
+        std::cout << "\tCheck. Implementations match." << std::endl;
         return true;
     } else {
-        std::cout << "BEWARE: Implementations DON'T match." << std::endl;
+        std::cout << "\tBEWARE: Implementations DON'T match." << std::endl;
         return false;
     }
 }

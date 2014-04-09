@@ -5,8 +5,7 @@
 #
 
 CC=g++
-### ADD SOME WARNINGS
-WARN=-Wall -Wextra
+WARN=-Wall -Wextra -g
 OPT=-O2 -fno-strict-aliasing
 LEDA=/usr/local/LEDA
 LIBS=-I$(LEDA)/incl -L$(LEDA) -L/usr/X11R6/lib64/
