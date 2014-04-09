@@ -10,6 +10,35 @@
 #include <cmath>
 
 /*
+ * Internal auxiliary function to construct a clique around a node
+ */
+static void generate_clique(leda::graph& G, leda::node& v, int nodes_per_clique)
+{
+    int i;
+    leda::node w, r;
+    leda::list<leda::node> L;
+
+    // Constructing clique
+    for (i = 0; i < nodes_per_clique; i++) {
+        w = G.new_node();
+        // bidirectional
+        G.new_edge(w,v);
+        G.new_edge(v,w);
+        // keeping it for later, so we can fill in the missing edges
+        L.append(w);
+    }
+
+    // Inserting missing edges (to itself included)
+    forall(r, L) {
+        forall(w, L) {
+            if (r == w)
+                continue;
+            G.new_edge(r,w);
+        }
+    }
+}
+
+/*
  * Constructing hard graphs with k connected cliques.
  * Of course they should have k SCC.
  *
@@ -18,21 +47,17 @@
  */
 static void construct_cliqued_graph(leda::graph& G, int k, long n)
 {
-    int i, j;
-    leda::node f, v, w;
+    int i;
+    leda::node f, v;
     long nodes_per_clique = n/k;
 
     /* Constructing the initial nodes that will connect the cliques */
     f = G.new_node();
+    generate_clique(G, f, nodes_per_clique);
     for (i = 1; i < k; i++) {
         v = G.new_node();
         G.new_edge(f,v);
-        // Constructing clique
-        for (j = 0; j < nodes_per_clique; j++) {
-            w = G.new_node();
-            G.new_edge(w,f); // TODO: merge. connect others.
-            G.new_edge(f,w);
-        }
+        generate_clique(G, v, nodes_per_clique);
         f = v;
     }
 }
