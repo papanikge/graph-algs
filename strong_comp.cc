@@ -66,9 +66,9 @@ bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums
 {
     node n, v;
     set<int> S;
-    int orig_counter = 0;
-    int rev_counter  = 0;
+    int orig_counter, rev_counter;
     list<node> LN1, LN2;
+    bool currently = true;
 
     forall_nodes(n, G) {
         /* we need to perform the test for one node in each clique */
@@ -76,6 +76,9 @@ bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums
             continue;
         else
             S.insert(check_nums[n]);
+
+        orig_counter = 0;
+        rev_counter  = 0;
 
         node_array<int> for_bfs(G, -1);
         /* Performing BFS on the original and on the reverse graph.*/
@@ -92,14 +95,13 @@ bool STRONG_COMPONENTS_checker(leda::graph& G, leda::node_array<int>& check_nums
             if (check_nums[n] == check_nums[v])
                 rev_counter++;
         }
+
+        /* Checking the summing of the found nodes. They need to be the same. */
+        if (rev_counter != orig_counter) {
+            currently = false;
+            break;
+        }
     }
 
-    /* Checking the summing of the found nodes. They need to be the same. */
-    if (rev_counter == orig_counter) {
-        std::cout << "\tCheck. Implementations match." << std::endl;
-        return true;
-    } else {
-        std::cout << "\tBEWARE: Implementations DON'T match." << std::endl;
-        return false;
-    }
+    return currently;
 }

@@ -81,6 +81,7 @@ static void test_implementations(leda::graph& G, leda::node_array<int>& sccnum)
 int main()
 {
     int i, j, e;
+    bool ret;
     int N[] = { 20000, 40000, 90000 };
     int K[] = { 5, 10, 20 };
     leda::graph G, T;
@@ -94,7 +95,11 @@ int main()
     G.new_edge(s, t);
     leda::node_array<int> check_nums(G, 0);
     my_STRONG_COMPONENTS(G, check_nums);
-    STRONG_COMPONENTS_checker(G, check_nums);
+    ret = STRONG_COMPONENTS_checker(G, check_nums);
+    if (ret)
+        std::cout << "\tCheck. Implementations match." << std::endl;
+    else
+        std::cout << "\tBEWARE: Implementations DON'T match." << std::endl;
 
     // Random graphs.
     std::cout << "!>>> Random graphs... " << std::endl;
