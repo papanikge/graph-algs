@@ -26,8 +26,6 @@ int my_STRONG_COMPONENTS(graph& G, node_array<int>& compnum)
     node_array<int> useless(G, 0);
     node_array<bool> reached(G, false);
 
-    // reinitialize to our copy
-    compnum.init(G, 0);
     // first DFS over the graph, to get the completion times
     DFS_NUM(G, useless, compnum);
 
