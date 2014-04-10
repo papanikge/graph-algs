@@ -12,7 +12,7 @@
 /*
  * Internal auxiliary function to construct a clique around a node
  */
-static void generate_clique(leda::graph& G, leda::node& v, int nodes_per_clique)
+static inline void generate_clique(leda::graph& G, leda::node& v, int nodes_per_clique)
 {
     int i;
     leda::node w, r;
@@ -40,7 +40,7 @@ static void generate_clique(leda::graph& G, leda::node& v, int nodes_per_clique)
 
 /*
  * Constructing hard graphs with k connected cliques.
- * Of course they should have k SCC.
+ * Of course they should have k SCCs.
  *
  * @k : number of cliques
  * @n : number of nodes in the graph
