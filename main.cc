@@ -83,7 +83,7 @@ int main()
     int i, j, e;
     bool ret;
     int N[] = { 20000, 40000, 90000 };
-    int K[] = { 5, 10, 20 };
+    int K[] = { 10, 20, 50 };
     leda::graph G, T;
     leda::node t, s;
 
@@ -117,7 +117,9 @@ int main()
     }
 
     // Cliqued graphs.
-    N[0] = 10000;
+    N[0] = 5000;
+    N[1] = 8000;
+    N[2] = 10000;
     std::cout << "!>>> Cliqued graphs... " << std::endl;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
