@@ -63,22 +63,22 @@ int main(int argc, char **argv)
         connected_random_generator(G, n, cost);
         benchmark_implementations(G, cost);
     } else {
-        std::cout << "\n>>> Minimum Spanning Tree Benchmarking <<<\n";
+        std::cout << "\n-=-=-=-=- Minimum Spanning Tree Benchmarking -=-=-=-=-\n";
         std::cout << "Give -n <number of nodes> if you want custom nodes\n";
         std::cout << "Moving on with the default number of nodes...\n\n";
+        std::cout << ">>> Random graphs..." << std::endl;
         for (i = 0; i < 3; i++) {
-            std::cout << ">>> Random graphs...";
             connected_random_generator(G, N[i], cost);
             benchmark_implementations(G, cost);
 
             // clean up
             G.clear();
         }
+        std::cout << ">>> Grid graphs..." << std::endl;
         N[0] = 100;
         N[1] = 200;
         N[2] = 300;
         for (i = 0; i < 3; i++) {
-            std::cout << ">>> Grid graphs...";
             leda::grid_graph(G, N[i]);
             // this is a hack, LEDA cannot produce an undirected grid
             // graph, so we make them bidirectional.
