@@ -14,25 +14,33 @@
 #include <LEDA/graph/min_span.h>
 #include <LEDA/system/timer.h>
 
+#define MAXIMUM_WEIGHT 10000
+
+/*
+ * Auxiliary function to assign random weights to an edge array
+ */
+void assign_random_weights(leda::graph& G, leda::edge_array<int>& cost)
+{
+    leda::edge e;
+
+    srand(time(NULL));
+    cost.init(G, 0);
+    forall_edges(e, G) {
+        cost[e] = rand() % MAXIMUM_WEIGHT + 1;
+    }
+}
+
 /*
  * Wrapper around undirected random graph generation with random edge weights.
  * Calculates number-of-nodes to be the theoretical maximum so the graph would
  * be fully connected (aka complete).
- * TODO: eventually we need to be able to generate boost *and* LEDA graphs, so we
- * may need to make this a class of some sort (?)
  */
 void connected_random_generator(leda::graph& G, int number_of_nodes, leda::edge_array<int>& cost)
 {
-    leda::edge e;
     int number_of_edges = 2 * number_of_nodes * log10(number_of_nodes);
 
     leda::random_simple_undirected_graph(G, number_of_nodes, number_of_edges);
-    // assigning random weights
-    cost.init(G, 0);
-    srand(time(NULL));
-    forall_edges(e, G) {
-        cost[e] = rand() % 10000 + 1;
-    }
+    assign_random_weights(G, cost);
 
     std::cout << "Graph generated. Nodes: " << number_of_nodes << std::endl;
     return;
@@ -54,7 +62,6 @@ int main(int argc, char **argv)
 {
     int i, n;
     leda::graph G;
-    leda::edge e; //// TODO: REMOVE THIS
     leda::edge_array<int> cost;
     int N[] = { 10000, 40000, 70000 };
 
@@ -83,14 +90,9 @@ int main(int argc, char **argv)
             // this is a hack, LEDA cannot produce an undirected grid
             // graph, so we make them bidirectional.
             G.make_bidirected();
+            assign_random_weights(G, cost);
+            std::cout << "Graph generated. " << N[i] << "x" << N[i] << " nodes" << std::endl;
 
-            // assigning random weights
-            // TODO: these need to get on their own function
-            cost.init(G, 0);
-            srand(time(NULL));
-            forall_edges(e, G) {
-                cost[e] = rand() % 10000 + 1;
-            }
             benchmark_implementations(G, cost);
 
             // clean up
