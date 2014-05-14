@@ -1,7 +1,8 @@
 #
 # George 'papanikge' Papanikolaou
 # CEID Advance Algorithm Desing Course 2014
-# Library of Efficient Data types and Algorithms (LEDA) testing
+# Boost & LEDA benchmarking
+# This makefile has the required paths for LEDA hardcoded
 #
 
 CC=g++
@@ -11,10 +12,10 @@ LEDA=/usr/local/LEDA
 LIBS=-I$(LEDA)/incl -L$(LEDA) -L/usr/X11R6/lib64/
 LFLAGS=-lleda -lX11 -lm
 
-all: leda.o
+all: main.o
 	$(CC) $? -o run_this $(LIBS) $(LFLAGS)
 
-leda.o: leda.cc
+main.o: main.cc
 	$(CC) $(WARN) $(OPT) -o $@ -c $< $(LIBS) $(LFLAGS)
 
 clean:
