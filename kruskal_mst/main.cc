@@ -82,6 +82,7 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
     forall_nodes(n, LG)
         BVs[n] = boost::add_vertex(BG);
 
+    // now attempting to add the edges between the vertices
     forall_edges(e, LG) {
         // we also add the coresponding weight every time
         BE = boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], weight[e], BG).first;
@@ -89,24 +90,26 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 }
 
 /*
- * Main function to run all the MST versions and benchmark their time
- * This function is responsible for the LEDA2Boost transformation and for the benchmarking
+ * Main function to run all the MST versions and benchmark their time.
+ * It's responsible for the LEDA2Boost transformation and for the benchmarking.
  */
 static void benchmark_implementations(const leda::graph& G, const leda::edge_array<int>& weight)
 {
     float T;
     BoostGraph BG;
-    std::pair<BoostEdgeIt, BoostEdgeIt> BoostEdgePair;
     std::vector<BoostEdge> spanning_tree;
 
+    // LEDA
     T = leda::used_time();
     leda::MIN_SPANNING_TREE(G, weight);
     std::cout << "\t\tLEDA MST calculation time: " << leda::used_time(T) << std::endl;
 
+    // Transform to Boost
     std::cout << "\tTransforming LEDA graph... ";
     leda2boost(G, BG, weight);
     std::cout << "Done." << std::endl;
 
+    // Boost
     leda::used_time(T);
     kruskal_minimum_spanning_tree(BG, std::back_inserter(spanning_tree));
     std::cout << "\t\tBoost MST calculation time: " << leda::used_time(T) << std::endl;
@@ -121,6 +124,7 @@ int main(int argc, char **argv)
     unsigned int N[] = { 10000, 40000, 70000 };
 
     if (argc > 2 && !strcmp(argv[1], "-n")) {
+        // for custom nodes
         n = atoi(argv[2]);
         connected_random_generator(G, n, weight);
         benchmark_implementations(G, weight);
@@ -128,6 +132,7 @@ int main(int argc, char **argv)
         std::cout << "\n-=-=-=-=- Minimum Spanning Tree Benchmarking -=-=-=-=-\n";
         std::cout << "Give -n <number of nodes> if you want custom nodes\n";
         std::cout << "Moving on with the default number of nodes...\n\n";
+
         std::cout << ">>> Random graphs..." << std::endl;
         for (i = 0; i < 3; i++) {
             connected_random_generator(G, N[i], weight);
@@ -142,12 +147,11 @@ int main(int argc, char **argv)
         N[2] = 300;
         for (i = 0; i < 3; i++) {
             leda::grid_graph(G, N[i]);
-            // this is a hack, LEDA cannot produce an undirected grid
+            // nasty hack, bacause LEDA cannot produce an undirected grid
             // graph, so we make them bidirectional.
             G.make_bidirected();
             assign_random_weights(G, weight);
             std::cout << "Graph generated. " << N[i] << "x" << N[i] << " nodes" << std::endl;
-
             benchmark_implementations(G, weight);
 
             // clean up
