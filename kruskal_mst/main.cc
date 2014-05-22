@@ -13,8 +13,27 @@
 #include <LEDA/graph/graph_gen.h>
 #include <LEDA/graph/min_span.h>
 #include <LEDA/system/timer.h>
+#include <boost/array.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #define MAXIMUM_WEIGHT 10000
+
+/*
+ * Required typedefs to get some meaning out of Boost code
+ */
+struct EdgeProperties {
+    int weight;
+};
+typedef boost::adjacency_list <boost::vecS,
+                               boost::vecS,
+                               boost::undirectedS,
+                               int,  // for the nodes, and for the edges:
+                               EdgeProperties> BoostGraph;
+typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
+typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;
+typedef boost::property_map<BoostGraph, int EdgeProperties::*>::type BWeightMap;
+
 
 /*
  * Auxiliary function to assign random weights to an edge array
@@ -44,6 +63,29 @@ void connected_random_generator(leda::graph& G, const int number_of_nodes, leda:
 
     std::cout << "Graph generated. Nodes: " << number_of_nodes << std::endl;
     return;
+}
+
+/*
+ * Function to convert an existing LEDA graph to BGL
+ */
+void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& weight, BWeightMap& Bweight)
+{
+    leda::edge e;
+    leda::node n;
+    BoostEdge BE;
+    // a leda node array of boost vertices. wicked.
+    leda::node_array<BoostVertex> BVs(LG);
+
+    // purge the old contents and start constructing the Boost mirror
+    BG.clear();
+    forall_nodes(n, LG)
+        BVs[n] = boost::add_vertex(BG);
+
+    forall_edges(e, LG) {
+        BE = boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], BG).first;
+        // we also need to "transfuse" the weights
+        Bweight[BE] = weight[e];
+    }
 }
 
 /*
