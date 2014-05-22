@@ -6,7 +6,7 @@
 #
 
 CC=g++
-WARN=-Wall -Wextra -g
+WARN=-Wall -Wextra -g -Wno-deprecated
 OPT=-O2 -fno-strict-aliasing
 LEDA=/usr/local/LEDA
 LIBS=-I$(LEDA)/incl -L$(LEDA) -L/usr/X11R6/lib64/
