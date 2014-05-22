@@ -19,14 +19,14 @@
 /*
  * Auxiliary function to assign random weights to an edge array
  */
-void assign_random_weights(leda::graph& G, leda::edge_array<int>& cost)
+static void assign_random_weights(const leda::graph& G, leda::edge_array<int>& weight)
 {
     leda::edge e;
 
     srand(time(NULL));
-    cost.init(G, 0);
+    weight.init(G, 0);
     forall_edges(e, G) {
-        cost[e] = rand() % MAXIMUM_WEIGHT + 1;
+        weight[e] = rand() % MAXIMUM_WEIGHT + 1;
     }
 }
 
@@ -35,12 +35,12 @@ void assign_random_weights(leda::graph& G, leda::edge_array<int>& cost)
  * Calculates number-of-nodes to be the theoretical maximum so the graph would
  * be fully connected (aka complete).
  */
-void connected_random_generator(leda::graph& G, int number_of_nodes, leda::edge_array<int>& cost)
+void connected_random_generator(leda::graph& G, const int number_of_nodes, leda::edge_array<int>& weight)
 {
     int number_of_edges = 2 * number_of_nodes * log10(number_of_nodes);
 
     leda::random_simple_undirected_graph(G, number_of_nodes, number_of_edges);
-    assign_random_weights(G, cost);
+    assign_random_weights(G, weight);
 
     std::cout << "Graph generated. Nodes: " << number_of_nodes << std::endl;
     return;
@@ -49,12 +49,12 @@ void connected_random_generator(leda::graph& G, int number_of_nodes, leda::edge_
 /*
  * Main function to run all the MST versions and benchmark their time
  */
-void benchmark_implementations(leda::graph& G, leda::edge_array<int>& cost)
+static void benchmark_implementations(const leda::graph& G, const leda::edge_array<int>& weight)
 {
     float T;
 
     T = leda::used_time();
-    leda::MIN_SPANNING_TREE(G, cost);
+    leda::MIN_SPANNING_TREE(G, weight);
     std::cout << "\t\tLEDA MST calculation time: " << leda::used_time(T) << std::endl;
 }
 
@@ -62,21 +62,21 @@ int main(int argc, char **argv)
 {
     int i, n;
     leda::graph G;
-    leda::edge_array<int> cost;
-    int N[] = { 10000, 40000, 70000 };
+    leda::edge_array<int> weight;
+    unsigned int N[] = { 10000, 40000, 70000 };
 
     if (argc > 2 && !strcmp(argv[1], "-n")) {
         n = atoi(argv[2]);
-        connected_random_generator(G, n, cost);
-        benchmark_implementations(G, cost);
+        connected_random_generator(G, n, weight);
+        benchmark_implementations(G, weight);
     } else {
         std::cout << "\n-=-=-=-=- Minimum Spanning Tree Benchmarking -=-=-=-=-\n";
         std::cout << "Give -n <number of nodes> if you want custom nodes\n";
         std::cout << "Moving on with the default number of nodes...\n\n";
         std::cout << ">>> Random graphs..." << std::endl;
         for (i = 0; i < 3; i++) {
-            connected_random_generator(G, N[i], cost);
-            benchmark_implementations(G, cost);
+            connected_random_generator(G, N[i], weight);
+            benchmark_implementations(G, weight);
 
             // clean up
             G.clear();
@@ -90,10 +90,10 @@ int main(int argc, char **argv)
             // this is a hack, LEDA cannot produce an undirected grid
             // graph, so we make them bidirectional.
             G.make_bidirected();
-            assign_random_weights(G, cost);
+            assign_random_weights(G, weight);
             std::cout << "Graph generated. " << N[i] << "x" << N[i] << " nodes" << std::endl;
 
-            benchmark_implementations(G, cost);
+            benchmark_implementations(G, weight);
 
             // clean up
             G.clear();
