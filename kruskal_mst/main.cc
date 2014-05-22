@@ -22,18 +22,18 @@
 /*
  * Required typedefs to get some meaning out of Boost code
  */
-struct EdgeProperties {
-    int weight;
-};
 typedef boost::adjacency_list <boost::vecS,
                                boost::vecS,
                                boost::undirectedS,
                                int,  // for the nodes, and for the edges:
-                               EdgeProperties> BoostGraph;
+                               boost::property<boost::edge_weight_t, int> > BoostGraph;
+// for the vertex-edge types
 typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
 typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;
-typedef boost::property_map<BoostGraph, int EdgeProperties::*>::type BWeightMap;
-
+// for the iterators
+typedef boost::graph_traits<BoostGraph>::edge_iterator     BoostEdgeIt;
+// for the edge-property-map (aka edge-array)
+typedef boost::property_map<BoostGraph, boost::edge_weight_t>::type BoostWeightMap;
 
 /*
  * Auxiliary function to assign random weights to an edge array
@@ -68,7 +68,7 @@ void connected_random_generator(leda::graph& G, const int number_of_nodes, leda:
 /*
  * Function to convert an existing LEDA graph to BGL
  */
-void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& weight, BWeightMap& Bweight)
+void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& weight)
 {
     leda::edge e;
     leda::node n;
@@ -82,9 +82,8 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
         BVs[n] = boost::add_vertex(BG);
 
     forall_edges(e, LG) {
-        BE = boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], BG).first;
-        // we also need to "transfuse" the weights
-        Bweight[BE] = weight[e];
+        // we also add the coresponding weight every time
+        BE = boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], weight[e], BG).first;
     }
 }
 
@@ -94,10 +93,27 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 static void benchmark_implementations(const leda::graph& G, const leda::edge_array<int>& weight)
 {
     float T;
+    BoostGraph BG;
+    std::pair<BoostEdgeIt, BoostEdgeIt> BoostEdgePair;
 
     T = leda::used_time();
     leda::MIN_SPANNING_TREE(G, weight);
     std::cout << "\t\tLEDA MST calculation time: " << leda::used_time(T) << std::endl;
+
+    ///////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////
+
+    leda2boost(G, BG, weight);
+    std::cout << "\t\tBoost transform calculation time: " << leda::used_time(T) << std::endl;
+
+    BoostWeightMap Bweights = get(boost::edge_weight_t(), BG);
+
+    for (BoostEdgePair = edges(BG);
+         BoostEdgePair.first != BoostEdgePair.second;
+         ++BoostEdgePair.first) {
+        std::cout << Bweights[*BoostEdgePair.first] << " ";
+    }
+
 }
 
 int main(int argc, char **argv)
