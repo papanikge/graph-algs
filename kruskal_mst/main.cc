@@ -16,6 +16,7 @@
 #include <boost/array.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/kruskal_min_spanning_tree.hpp>
 
 #define MAXIMUM_WEIGHT 10000
 
@@ -89,30 +90,26 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 
 /*
  * Main function to run all the MST versions and benchmark their time
+ * This function is responsible for the LEDA2Boost transformation and for the benchmarking
  */
 static void benchmark_implementations(const leda::graph& G, const leda::edge_array<int>& weight)
 {
     float T;
     BoostGraph BG;
     std::pair<BoostEdgeIt, BoostEdgeIt> BoostEdgePair;
+    std::vector<BoostEdge> spanning_tree;
 
     T = leda::used_time();
     leda::MIN_SPANNING_TREE(G, weight);
     std::cout << "\t\tLEDA MST calculation time: " << leda::used_time(T) << std::endl;
 
-    ///////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////
-
+    std::cout << "\tTransforming LEDA graph... ";
     leda2boost(G, BG, weight);
-    std::cout << "\t\tBoost transform calculation time: " << leda::used_time(T) << std::endl;
+    std::cout << "Done." << std::endl;
 
-    BoostWeightMap Bweights = get(boost::edge_weight_t(), BG);
-
-    for (BoostEdgePair = edges(BG);
-         BoostEdgePair.first != BoostEdgePair.second;
-         ++BoostEdgePair.first) {
-        std::cout << Bweights[*BoostEdgePair.first] << " ";
-    }
+    leda::used_time(T);
+    kruskal_minimum_spanning_tree(BG, std::back_inserter(spanning_tree));
+    std::cout << "\t\tBoost MST calculation time: " << leda::used_time(T) << std::endl;
 
 }
 
