@@ -90,6 +90,37 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 }
 
 /*
+ * My implementation of Kruskal's Minimum Spanning Tree algorithm
+ * TODO: split to another file
+ */
+void my_kruskal(BoostGraph& BG)
+{
+    BoostEdge e;
+    BoostEdgeIt e_it_st, e_it_end;
+    // for the comparison
+    typedef boost::indirect_cmp<BoostWeightMap, std::greater<int> > weight_greater;
+    BoostWeightMap Bweights;
+    weight_greater wl(Bweights);
+    // sorted queue of edge weights
+    std::priority_queue<BoostEdge, std::vector<BoostEdge>, weight_greater> Queue(wl);
+    // property map for easy accessing of the data
+    BoostWeightMap BB = get(boost::edge_weight_t(), BG);
+
+    /* first push all edges into Queue, so they would be sorted */
+    for (boost::tie(e_it_st, e_it_end) = edges(BG);
+         e_it_st != e_it_end;
+         ++e_it_st)
+        Queue.push(*e_it_st);
+
+    /* iterating over queue */
+    while (!Queue.empty()) {
+        e = Queue.top();
+        Queue.pop();
+        std::cout << "Weight: " << BB[e] << std::endl;
+    }
+}
+
+/*
  * Main function to run all the MST versions and benchmark their time.
  * It's responsible for the LEDA2Boost transformation and for the benchmarking.
  */
@@ -114,6 +145,9 @@ static void benchmark_implementations(const leda::graph& G, const leda::edge_arr
     kruskal_minimum_spanning_tree(BG, std::back_inserter(spanning_tree));
     std::cout << "\t\tBoost MST calculation time: " << leda::used_time(T) << std::endl;
 
+    // My Boost implementation benchmarking
+    my_kruskal(BG);
+    std::cout << "\t\tMy-Boost MST calculation time: " << leda::used_time(T) << std::endl;
 }
 
 int main(int argc, char **argv)
