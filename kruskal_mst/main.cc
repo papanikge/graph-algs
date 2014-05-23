@@ -36,6 +36,7 @@ typedef boost::graph_traits<BoostGraph>::edge_iterator     BoostEdgeIt;
 // for the edge-property-map (aka edge-array)
 typedef boost::property_map<BoostGraph, boost::edge_weight_t>::type BoostWeightMap;
 
+
 /*
  * Auxiliary function to assign random weights to an edge array
  */
@@ -48,6 +49,7 @@ static void assign_random_weights(const leda::graph& G, leda::edge_array<int>& w
     forall_edges(e, G) {
         weight[e] = rand() % MAXIMUM_WEIGHT + 1;
     }
+    return;
 }
 
 /*
@@ -73,7 +75,6 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 {
     leda::edge e;
     leda::node n;
-    BoostEdge BE;
     // a leda node array of boost vertices. wicked.
     leda::node_array<BoostVertex> BVs(LG);
 
@@ -85,8 +86,9 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
     // now attempting to add the edges between the vertices
     forall_edges(e, LG) {
         // we also add the coresponding weight every time
-        BE = boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], weight[e], BG).first;
+        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], weight[e], BG).first;
     }
+    return;
 }
 
 /*
@@ -118,6 +120,7 @@ void my_kruskal(BoostGraph& BG)
         Queue.pop();
         std::cout << "Weight: " << BB[e] << std::endl;
     }
+    return;
 }
 
 /*
@@ -148,6 +151,7 @@ static void benchmark_implementations(const leda::graph& G, const leda::edge_arr
     // My Boost implementation benchmarking
     my_kruskal(BG);
     std::cout << "\t\tMy-Boost MST calculation time: " << leda::used_time(T) << std::endl;
+    return;
 }
 
 int main(int argc, char **argv)
