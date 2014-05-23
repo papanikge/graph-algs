@@ -133,20 +133,19 @@ void my_kruskal(BoostGraph& BG, std::vector<BoostEdge> spanning_tree)
     }
 
     // iterating over queue
-    while (!Queue.empty()) {
+    while (!Queue.empty() && spanning_tree.size() < (num_edges(BG) - 1)) {
         e = Queue.top();
         Queue.pop();
         u = source(e, BG);
         v = target(e, BG);
 
-        if (L[mapper[u]].front() == L[mapper[v]].front()) {
-            // There is gonna be a circle if we add this edge
-            // TODO
-        } else {
-            // No circle occuring
-
-            // all check, add it to the returned vector
+        if (L[mapper[u]].front() != L[mapper[v]].front()) {
+            // No circle occuring, we can add the edge to the MST
             spanning_tree.push_back(e);
+            // merge lists for the next iteration
+            L[mapper[u]].insert(L[mapper[u]].end(), L[mapper[v]].begin(), L[mapper[v]].end());
+            // and the maps of course
+            mapper[v] = mapper[u];
         }
     }
     return;
