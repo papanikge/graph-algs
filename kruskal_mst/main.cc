@@ -5,6 +5,8 @@
 //
 
 #include <iostream>
+#include <vector>
+#include <map>
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
@@ -32,6 +34,7 @@ typedef boost::adjacency_list <boost::vecS,
 typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
 typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;
 // for the iterators
+typedef boost::graph_traits<BoostGraph>::vertex_iterator   BoostVertexIt;
 typedef boost::graph_traits<BoostGraph>::edge_iterator     BoostEdgeIt;
 // for the edge-property-map (aka edge-array)
 typedef boost::property_map<BoostGraph, boost::edge_weight_t>::type BoostWeightMap;
@@ -93,32 +96,58 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 
 /*
  * My implementation of Kruskal's Minimum Spanning Tree algorithm
+ * with lists & sub-forests using course's directions
  * TODO: split to another file
  */
-void my_kruskal(BoostGraph& BG)
+void my_kruskal(BoostGraph& BG, std::vector<BoostEdge> spanning_tree)
 {
-    BoostEdge e;
-    BoostEdgeIt e_it_st, e_it_end;
-    // for the comparison
     typedef boost::indirect_cmp<BoostWeightMap, std::greater<int> > weight_greater;
+
+    int i = 0;
+    BoostEdge e;
+    BoostVertex u, v;
+    BoostEdgeIt eit_st, eit_end;
+    BoostVertexIt vit_st, vit_end;
+    // we are going to use a map for easy pointer maninpulation of the other
+    // data structures. Every edge maps to something easily changeable that way
+    std::map<BoostVertex, int> mapper;
+    // for the comparison
     BoostWeightMap Bweights;
-    weight_greater wl(Bweights);
+    weight_greater w(Bweights);
     // sorted queue of edge weights
-    std::priority_queue<BoostEdge, std::vector<BoostEdge>, weight_greater> Queue(wl);
-    // property map for easy accessing of the data
-    BoostWeightMap BB = get(boost::edge_weight_t(), BG);
+    std::priority_queue<BoostEdge, std::vector<BoostEdge>, weight_greater> Queue(w);
+    // static array of dynamic vectors. Initially wee need to have one list for
+    // each edge but then we need the ability to add more to some cells. Weird.
+    std::vector<BoostVertex> L[num_vertices(BG)];
 
-    /* first push all edges into Queue, so they would be sorted */
-    for (boost::tie(e_it_st, e_it_end) = edges(BG);
-         e_it_st != e_it_end;
-         ++e_it_st)
-        Queue.push(*e_it_st);
+    // first push all edges into Queue, so they would be sorted,
+    for (boost::tie(eit_st, eit_end) = edges(BG); eit_st != eit_end; ++eit_st)
+        Queue.push(*eit_st);
 
-    /* iterating over queue */
+    // then initialize vertices to a counter in the dictionary,
+    // then add it to the required list. We have |edges| number of lists.
+    for (boost::tie(vit_st, vit_end) = vertices(BG); vit_st != vit_end; ++vit_st) {
+        mapper[*vit_st] = i;
+        L[i].push_back(*vit_st);
+        i++;
+    }
+
+    // iterating over queue
     while (!Queue.empty()) {
         e = Queue.top();
         Queue.pop();
-        std::cout << "Weight: " << BB[e] << std::endl;
+        u = source(e, BG);
+        v = target(e, BG);
+
+        if (L[mapper[u]].front() == L[mapper[v]].front()) {
+            // There is gonna be a circle if we add this edge
+            // TODO
+        } else {
+            // No circle occuring
+
+            // all check, add it to the returned vector
+            spanning_tree.push_back(e);
+        }
     }
     return;
 }
@@ -149,7 +178,8 @@ static void benchmark_implementations(const leda::graph& G, const leda::edge_arr
     std::cout << "\t\tBoost MST calculation time: " << leda::used_time(T) << std::endl;
 
     // My Boost implementation benchmarking
-    my_kruskal(BG);
+    spanning_tree.clear();
+    my_kruskal(BG, spanning_tree);
     std::cout << "\t\tMy-Boost MST calculation time: " << leda::used_time(T) << std::endl;
     return;
 }
