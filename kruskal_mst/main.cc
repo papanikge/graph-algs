@@ -95,6 +95,18 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 }
 
 /*
+ * Merge two vectors by adding only at the end
+ */
+static inline void mergevectors(std::vector<BoostVertex> to, std::vector<BoostVertex> from)
+{
+    std::vector<BoostVertex>::iterator it;
+
+    for (it = from.begin(); it != from.end(); ++it) {
+        to.push_back(*it);
+    }
+}
+
+/*
  * My implementation of Kruskal's Minimum Spanning Tree algorithm
  * with lists & sub-forests using course's directions
  * TODO: split to another file
@@ -143,7 +155,7 @@ void my_kruskal(BoostGraph& BG, std::vector<BoostEdge> spanning_tree)
             // No circle occuring, we can add the edge to the MST
             spanning_tree.push_back(e);
             // merge lists for the next iteration
-            L[mapper[u]].insert(L[mapper[u]].end(), L[mapper[v]].begin(), L[mapper[v]].end());
+            mergevectors(L[mapper[u]], L[mapper[v]]);
             // and the maps of course
             mapper[v] = mapper[u];
         }
