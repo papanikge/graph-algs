@@ -15,13 +15,13 @@ LFLAGS=-lleda -lX11 -lm
 all: main.o kruskal.o graph.o
 	$(CC) $? -o run_this $(LIBS) $(LFLAGS)
 
-main.o: main.cc
+main.o: main.cc types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
-kruskal.o: kruskal.cc
+kruskal.o: kruskal.cc types.h
 	$(CC) $(WARN) $(FLAG) -O3 -o $@ -c $<
 
-graph.o: graph.cc
+graph.o: graph.cc types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
 clean:
