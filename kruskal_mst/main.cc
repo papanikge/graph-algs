@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <deque>
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
@@ -95,11 +96,11 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 }
 
 /*
- * Merge two vectors by adding only at the end
+ * Merge two lists by adding only at the end
  */
-static inline void mergevectors(std::vector<BoostVertex> to, std::vector<BoostVertex> from)
+static inline void mergedeques(std::deque<BoostVertex> to, std::deque<BoostVertex> from)
 {
-    std::vector<BoostVertex>::iterator it;
+    std::deque<BoostVertex>::iterator it;
 
     for (it = from.begin(); it != from.end(); ++it) {
         to.push_back(*it);
@@ -128,9 +129,9 @@ void my_kruskal(BoostGraph& BG, std::vector<BoostEdge> spanning_tree)
     weight_greater w(Bweights);
     // sorted queue of edge weights
     std::priority_queue<BoostEdge, std::vector<BoostEdge>, weight_greater> Queue(w);
-    // static array of dynamic vectors. Initially wee need to have one list for
+    // static array of dynamic lists. Initially wee need to have one list for
     // each edge but then we need the ability to add more to some cells. Weird.
-    std::vector<BoostVertex> L[num_vertices(BG)];
+    std::deque<BoostVertex> L[num_vertices(BG)];
 
     // first push all edges into Queue, so they would be sorted,
     for (boost::tie(eit_st, eit_end) = edges(BG); eit_st != eit_end; ++eit_st)
@@ -155,7 +156,7 @@ void my_kruskal(BoostGraph& BG, std::vector<BoostEdge> spanning_tree)
             // No circle occuring, we can add the edge to the MST
             spanning_tree.push_back(e);
             // merge lists for the next iteration
-            mergevectors(L[mapper[u]], L[mapper[v]]);
+            mergedeques(L[mapper[u]], L[mapper[v]]);
             // and the maps of course
             mapper[v] = mapper[u];
         }
