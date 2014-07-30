@@ -15,7 +15,7 @@
 #include "types.h"
 
 /* Prototypes */
-void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities)
+void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
 void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities);
 
 /*
@@ -45,7 +45,8 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
         std::cout << "\t\tLEDA Maximum flow calculation was wrong!!!" << std::endl;
 
     /* Transform to Boost */
-    std::cout << "\tTransforming LEDA graph to Boost graph... ";
+    std::cout << "\t  Transforming LEDA graph to Boost graph... ";
+    std::cout.flush();
     leda2boost(G, BG, capacities);
     std::cout << "Done." << std::endl;
 
@@ -77,9 +78,11 @@ int main(int argc, char **argv)
 
         std::cout << ">>> Random graphs...\n";
         for (i = 0; i < 3; i++) {
+            std::cout << "\tGenerating random graph with " << N[i] << " nodes... ";
+            std::cout.flush();
             leda::random_graph(G, N[i], N[i]*log10(N[i]));
             generate_random_capacities(G, capacities);
-            std::cout << "\tGraph generated.\n";
+            std::cout << "Done." << std::endl;
 
             benchmark(G, capacities);
 

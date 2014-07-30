@@ -12,7 +12,7 @@ LEDA=/usr/local/LEDA
 LIBS=-I$(LEDA)/incl -L$(LEDA) -L/usr/X11R6/lib64/
 LFLAGS=-lleda -lX11 -lm
 
-all: main.o
+all: main.o aux.o
 	$(CC) $? -o run_this $(LIBS) $(LFLAGS)
 
 main.o: main.cc types.h
