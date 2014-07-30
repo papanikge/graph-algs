@@ -18,6 +18,9 @@ all: main.o
 main.o: main.cc types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
+aux.o: aux.cc types.h
+	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
+
 clean:
 	rm -f run_this a.out *.o
 

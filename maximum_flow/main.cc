@@ -20,24 +20,6 @@
 #include <LEDA/system/timer.h>
 
 // #include "types.h"
-/* TODO: add/remove some of these */
-
-#define MAXIMUM_CAP 100
-
-/*
- * Fill in the capacities vector
- */
-static void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities)
-{
-    leda::edge e;
-
-    srand(time(NULL));
-    capacities.init(G, 0);
-    forall_edges(e,G) {
-        capacities[e] = rand() % MAXIMUM_CAP + 1;
-    }
-    return;
-}
 
 /*
  * Main function to run all the benchmarks.
