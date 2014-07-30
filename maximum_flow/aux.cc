@@ -1,18 +1,11 @@
 /*
  * George Papanikolaou CEID 2014
- * Auxiliary functions such as leda->boost conversion
+ * Auxiliary functions such as LEDA->Boost conversion
  */
 
 #include <iostream>
 #include <cmath>
 #include <LEDA/graph/graph.h>
-#include <LEDA/graph/graph_gen.h>
-#include <LEDA/graph/min_span.h>
-#include <LEDA/system/timer.h>
-#include <boost/array.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/kruskal_min_spanning_tree.hpp>
 #include "types.h"
 
 #define MAXIMUM_CAP 100
@@ -35,7 +28,7 @@ void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& cap
 /*
  * Function to convert an existing LEDA graph to BGL
  */
-void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& weight)
+void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities)
 {
     leda::edge e;
     leda::node n;
@@ -49,8 +42,8 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 
     // now attempting to add the edges between the vertices
     forall_edges(e, LG) {
-        // we also add the coresponding weight every time
-        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], weight[e], BG).first;
+        // we also add the corresponding capacity every time since Boost keeps them inside the graph
+        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG).first;
     }
     return;
 }

@@ -2,6 +2,10 @@
  * Required typedefs to get some meaning out of Boost code
  */
 
+#include <boost/array.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
 // main graph type
 typedef boost::adjacency_list <boost::vecS,
                                boost::vecS,

@@ -1,43 +1,41 @@
-//
-// George 'papanikge' Papanikolaou
-// CEID Advance Algorithm Design Course 2014
-// Benchmarking of Maximum flow algorithms with Boost & LEDA
-//
+/*
+ * George 'papanikge' Papanikolaou
+ * CEID Advance Algorithm Design Course 2014
+ * Benchmarking of Shortest Augmenting Path MF Algorithm with Boost & LEDA
+ */
 
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
-#include <cmath>
-#include <boost/array.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/kruskal_min_spanning_tree.hpp>
 #include <LEDA/graph/graph.h>
 #include <LEDA/graph/graph_gen.h>
 #include <LEDA/graph/max_flow.h>
 #include <LEDA/system/timer.h>
+#include "types.h"
 
-// #include "types.h"
+/* Prototypes */
+void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities)
+void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities);
 
 /*
- * Main function to run all the benchmarks.
+ * Runs benchmarks for a given graph
  */
 static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
 {
     float T;
     int max_flow;
+    BoostGraph BG;
     leda::node s, t;
     leda::edge_array<int> flow(G);
 
-    // pick random source/sink nodes
+    /* pick random source/sink nodes */
     s = G.choose_node();
     do {
         t = G.choose_node();
     } while (s == t);
 
-    // LEDA's internal
+    /* LEDA's internal */
     T = leda::used_time();
     max_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
     std::cout << "\t\tLEDA Calculation time: " << leda::used_time(T) << std::endl;
@@ -46,7 +44,13 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
     else
         std::cout << "\t\tLEDA Maximum flow calculation was wrong!!!" << std::endl;
 
+    /* Transform to Boost */
+    std::cout << "\tTransforming LEDA graph to Boost graph... ";
+    leda2boost(G, BG, capacities);
+    std::cout << "Done." << std::endl;
+
     /* My implementation TODO */
+    /* TODO */
 
     return;
 }
@@ -64,6 +68,7 @@ int main(int argc, char **argv)
         n = atoi(argv[2]);
         leda::random_graph(G, n, n*log10(n));
         generate_random_capacities(G, capacities);
+
         benchmark(G, capacities);
     } else {
         /* Default values in the nodes */
@@ -75,9 +80,10 @@ int main(int argc, char **argv)
             leda::random_graph(G, N[i], N[i]*log10(N[i]));
             generate_random_capacities(G, capacities);
             std::cout << "\tGraph generated.\n";
+
             benchmark(G, capacities);
 
-            // clean up
+            /* cleaning up for the next iteration */
             G.clear();
         }
     }
