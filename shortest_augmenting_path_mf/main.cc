@@ -17,6 +17,7 @@
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
 void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities);
+int  shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow);
 
 /*
  * Runs benchmarks for a given graph
@@ -38,11 +39,11 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
     /* LEDA's internal */
     T = leda::used_time();
     max_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
-    std::cout << "\t\tLEDA Calculation time: " << leda::used_time(T) << std::endl;
+    std::cout << "\t\tLEDA's Calculation time: " << leda::used_time(T) << std::endl;
     if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
-        std::cout << "\t\tLEDA's maximum flow was: " << max_flow << std::endl;
+        std::cout << "\t\tLEDA's Maximum Flow was: " << max_flow << std::endl;
     else
-        std::cout << "\t\tLEDA Maximum flow calculation was wrong!!!" << std::endl;
+        std::cout << "\t\tLEDA's Maximum Flow calculation was wrong!!!" << std::endl;
 
     /* Transform to Boost */
     std::cout << "\t  Transforming LEDA graph to Boost graph... ";
@@ -50,8 +51,11 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
     leda2boost(G, BG, capacities);
     std::cout << "Done." << std::endl;
 
-    /* My implementation TODO */
-    /* TODO */
+    /* My implementation */
+    T = leda::used_time();
+    max_flow = shortest_aug_path(BG);
+    std::cout << "\t\tSAP's Algorithm's time: " << leda::used_time(T) << std::endl;
+    std::cout << "\t\tSAP's maximum flow was: " << max_flow << std::endl;
 
     return;
 }

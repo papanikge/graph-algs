@@ -21,6 +21,10 @@ main.o: main.cc boost-types.h
 aux.o: aux.cc boost-types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
+# Boost-only file so we don't need the LEDA dependencies
+sap.o: sap.cc boost-types.h
+	$(CC) $(WARN) $(FLAG) -O3 -o $@ -c $<
+
 clean:
 	rm -f run_this a.out *.o
 
