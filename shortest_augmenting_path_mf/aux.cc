@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <LEDA/graph/graph.h>
-#include "types.h"
+#include "boost-types.h"
 
 #define MAXIMUM_CAP 100
 

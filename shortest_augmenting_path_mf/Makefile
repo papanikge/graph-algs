@@ -15,10 +15,10 @@ LFLAGS=-lleda -lX11 -lm
 all: main.o aux.o
 	$(CC) $? -o run_this $(LIBS) $(LFLAGS)
 
-main.o: main.cc types.h
+main.o: main.cc boost-types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
-aux.o: aux.cc types.h
+aux.o: aux.cc boost-types.h
 	$(CC) $(WARN) $(FLAG) -O2 -o $@ -c $< $(LIBS) $(LFLAGS)
 
 clean:

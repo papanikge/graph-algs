@@ -12,7 +12,7 @@
 #include <LEDA/graph/graph_gen.h>
 #include <LEDA/graph/max_flow.h>
 #include <LEDA/system/timer.h>
-#include "types.h"
+#include "boost-types.h"
 
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
