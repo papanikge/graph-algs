@@ -67,12 +67,16 @@ int main(int argc, char **argv)
     leda::edge_array<int> capacities;
     unsigned int N[] = { 1000, 3000, 5000 };
 
-    std::cout << "\n-=-=-=-=- Maximum Flow Algorithm Benchmarking -=-=-=-=-\n";
+    std::cout << "\n-=-=-=-=- Shortest Augmenting Path MF Algorithm Benchmarking -=-=-=-=-\n";
     if (argc > 2 && !strcmp(argv[1], "-n")) {
         /* Custom nodes from the command line */
         n = atoi(argv[2]);
-        leda::random_graph(G, n, n*log10(n));
+        leda::random_simple_loopfree_graph(G, n, n*log10(n));
         generate_random_capacities(G, capacities);
+
+        /* Safety check */
+        if (G.is_undirected())
+            std::cerr << "BUG! Graph is undirected!" << std::endl;
 
         benchmark(G, capacities);
     } else {
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
         for (i = 0; i < 3; i++) {
             std::cout << "\tGenerating random graph with " << N[i] << " nodes... ";
             std::cout.flush();
-            leda::random_graph(G, N[i], N[i]*log10(N[i]));
+            leda::random_simple_loopfree_graph(G, N[i], N[i]*log10(N[i]));
             generate_random_capacities(G, capacities);
             std::cout << "Done." << std::endl;
 

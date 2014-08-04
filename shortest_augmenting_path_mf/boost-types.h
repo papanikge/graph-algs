@@ -23,8 +23,10 @@ typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
 typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;
 // for the iterators
 typedef boost::graph_traits<BoostGraph>::vertex_iterator   BoostVertexIt;
-typedef boost::graph_traits<BoostGraph>::edge_iterator     BoostEdgeIt;
-// for the edge-property-map (aka edge-array)
-typedef boost::property_map<BoostGraph, boost::edge_weight_t>::type BoostWeightMap;
+typedef boost::graph_traits<BoostGraph>::out_edge_iterator BoostOutEdgeIt;
+// for easy accessing of vertices
+typedef boost::property_map<BoostGraph, boost::vertex_index_t>::type IndexMap;
+// for creating arrays with information
+typedef boost::graph_traits<BoostGraph>::vertices_size_type VerticesSizeType;
 
 #endif
