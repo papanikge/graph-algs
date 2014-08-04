@@ -14,8 +14,9 @@
 typedef boost::adjacency_list <boost::vecS,
                                boost::vecS,
                                boost::directedS,
-                               // maybe? --> boost::no_property
-                               int,  // this one for the nodes, and the next for the edges:
+                               // vertex properties:
+                               boost::no_property,
+                               // edge properties:
                                boost::property<boost::edge_weight_t, int> > BoostGraph;
 // for the vertex-edge types
 typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
