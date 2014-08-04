@@ -49,8 +49,9 @@ int shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow)
     int i, j, s, t;     /* pivots, source & sink ('t' from target) */
     unsigned int   n = boost::num_vertices(BG);
     unsigned int   m = boost::num_edges(BG);
-    BoostVertex    src, trg;
+    BoostVertex    chosen;
     BoostOutEdgeIt one, two;
+    std::vector<BoostVertex> avail;
     /* Vertices index map */
     IndexMap index = boost::get(boost::vertex_index, BG);
     /* We'll just use a regular array to store the distances for the sake of simplicity. */
@@ -72,20 +73,14 @@ int shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow)
     // TODO: somewhere we should construct the augmented tree into "ret_flow"
     i = s;
     while (distances[s] < n) {
-        /* trying to get an outgoing edge */
-        boost::tie(one, two) = boost::out_edges(boost::vertex(i, BG), BG);
-        if (one) {
+        /* Trying to get an admissible edge. First we organise accessible vertices
+         * to a vector and then we select one */
+        for (boost::tie(one, two) = boost::out_edges(boost::vertex(i, BG), BG); one != two; ++one)
+            avail.push_back(boost::target(*one, BG));
+        if (avail.size() != 0) {
             /* ADVANCE operation */
-            src = boost::source(*one, BG);
-            trg = boost::target(*one, BG);
-
-            /* Safety: Source of the edge should be i. */
-            if (index[src] != i) {
-                std::cerr << "BUG!!" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            j = index[trg];
+            chosen = avail[rand() % avail.size()]; // TODO: this is stupid
+            j = index[chosen];
             parent[j] = i;
             i = j;
             if (i == t) {
