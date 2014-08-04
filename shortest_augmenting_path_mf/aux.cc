@@ -20,7 +20,7 @@ void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& cap
     srand(time(NULL));
     capacities.init(G, 0);
     forall_edges(e,G) {
-        capacities[e] = rand() % MAXIMUM_CAP + 1;
+        capacities[e] = rand() % (MAXIMUM_CAP + 1);
     }
     return;
 }
@@ -32,17 +32,19 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 {
     leda::edge e;
     leda::node n;
-    // a leda node array of boost vertices. wicked.
+    /* A LEDA node-array of Boost vertices. Wicked. */
     leda::node_array<BoostVertex> BVs(LG);
 
-    // purge the old contents and start constructing the Boost mirror
+    /* Purge the old contents and start constructing the Boost mirror. */
     BG.clear();
-    forall_nodes(n, LG)
+    forall_nodes(n, LG) {
+        /* Constructing vertices first. We could add properties here. */
         BVs[n] = boost::add_vertex(BG);
+    }
 
-    // now attempting to add the edges between the vertices
+    /* Now attempting to add the edges between the vertices. */
     forall_edges(e, LG) {
-        // we also add the corresponding capacity every time since Boost keeps them inside the graph
+        /* We also add the corresponding capacity every time since Boost keeps them inside the graph. */
         boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG).first;
     }
     return;
