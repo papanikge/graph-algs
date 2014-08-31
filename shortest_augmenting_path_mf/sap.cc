@@ -44,13 +44,12 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * this file's core function
  */
-int shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow)
+int shortest_aug_path(BoostGraph& BG, BoostVertex& s, BoostVertex& t)
 {
-    int i, j, s, t;     /* pivots, source & sink ('t' from target) */
-    unsigned int   n = boost::num_vertices(BG);
-    unsigned int   m = boost::num_edges(BG);
-    BoostVertex    chosen;
-    BoostOutEdgeIt one, two;
+    int i, j;
+    unsigned int n = boost::num_vertices(BG);
+    unsigned int m = boost::num_edges(BG);
+    BoostOutEdgeIt current, next;
     std::vector<BoostVertex> avail;
     /* Vertices index map */
     IndexMap index = boost::get(boost::vertex_index, BG);
@@ -59,28 +58,27 @@ int shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow)
     std::fill_n(distances, n, 0);
     /* ...and a similar one for the parent nodes */
     VerticesSizeType parent[n];
-
-    /* Finding target and source... randomly */
-    srand(time(NULL));
-    s = rand() % (n + 1);
-    t = rand() % (n + 1);
+    std::fill_n(parent, n, NULL);
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
     boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(t, BG),
                boost::visitor(boost::make_bfs_visitor(boost::record_distances(&distances[0],
                                                                               boost::on_tree_edge())))); 
 
-    // TODO: somewhere we should construct the augmented tree into "ret_flow"
     i = s;
     while (distances[s] < n) {
-        /* Trying to get an admissible edge. First we organise accessible vertices
-         * to a vector and then we select one */
-        for (boost::tie(one, two) = boost::out_edges(boost::vertex(i, BG), BG); one != two; ++one)
-            avail.push_back(boost::target(*one, BG));
+        /* Iterating through all out going edges of current node */
+        for (boost::tie(current, next) = boost::out_edges(boost::vertex(i, BG), BG); current != next; ++current) {
+            /* Selecting only admissible ones */
+            if (distances[i] == distances[boost::target(*current)] + 1)
+                avail.push_back(boost::target(*current, BG));
+        }
+
         if (avail.size() != 0) {
+            /* Get the requirements */
+            /* TODO: need to remove that index-BS */
+            j = index[avail[0]];
             /* ADVANCE operation */
-            chosen = avail[rand() % avail.size()]; // TODO: this is stupid
-            j = index[chosen];
             parent[j] = i;
             i = j;
             if (i == t) {

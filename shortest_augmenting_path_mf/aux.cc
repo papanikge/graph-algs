@@ -32,7 +32,7 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 {
     leda::edge e;
     leda::node n;
-    /* A LEDA node-array of Boost vertices. Wicked. */
+    /* A LEDA node-array of Boost vertices. */
     leda::node_array<BoostVertex> BVs(LG);
 
     /* Purge the old contents and start constructing the Boost mirror. */

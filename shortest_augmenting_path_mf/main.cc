@@ -20,43 +20,47 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
 int  shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow);
 
 /*
- * Runs benchmarks for a given graph
+ * Runs benchmarks for a given graph.
+ * We are printing directly to cerr in this function to avoid multiple flush()es
  */
 static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
 {
     float T;
-    int max_flow;
+    int leda_flow, my_flow;
     BoostGraph BG;
     leda::node s, t;
     leda::edge_array<int> flow(G);
 
-    /* pick random source/sink nodes */
+    /* Pick random source/sink nodes. TODO: user option? */
     s = G.choose_node();
     do {
         t = G.choose_node();
     } while (s == t);
 
-    /* LEDA's internal */
-    T = leda::used_time();
-    max_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
-    std::cout << "\t\tLEDA's Calculation time: " << leda::used_time(T) << std::endl;
-    if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
-        std::cout << "\t\tLEDA's Maximum Flow was: " << max_flow << std::endl;
-    else
-        std::cout << "\t\tLEDA's Maximum Flow calculation was wrong!!!" << std::endl;
-
-    /* Transform to Boost */
-    std::cout << "\t  Transforming LEDA graph to Boost graph... ";
-    std::cout.flush();
+    /* Initial errands */
+    std::cerr << "\t  Preparing graphs... ";
     leda2boost(G, BG, capacities);
-    std::cout << "Done." << std::endl;
+    std::cerr << "Done." << std::endl;
+
+    /* LEDA's internal implementation */
+    T = leda::used_time();
+    leda_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
+    std::cerr << "\t\tLEDA's Calculation time: " << leda::used_time(T);
+    if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
+        std::cerr << "... [Correct]" << std::endl;
+    else
+        std::cerr << "... [Wrong]" << std::endl;
 
     /* My implementation */
     T = leda::used_time();
-    max_flow = shortest_aug_path(BG);
-    std::cout << "\t\tSAP's Algorithm's time: " << leda::used_time(T) << std::endl;
-    std::cout << "\t\tSAP's maximum flow was: " << max_flow << std::endl;
+    my_flow = shortest_aug_path(BG, s, t);
+    std::cerr << "\t\tCustom SAP Algorithm implementation time: " << leda::used_time(T) << std::endl;
 
+    /* Testing & final errands */
+    if (my_flow == leda_flow)
+        std::cerr << "\t\t[Return values match!]" << std::endl;
+    else
+        std::cerr << "\t\t[Return values do NOT match!]" << std::endl;
     return;
 }
 
