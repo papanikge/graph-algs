@@ -42,26 +42,42 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 }
 
 /*
- * Tracing the path back to the source and finding the minimux residue capacity
+ * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int min_res_on_path(BoostGraph& BG, VerticesSizeType *parent, int f)
+static void augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
+    BoostEdge e;
     BoostVertex u, v;
+    std::vector<BoostEdge> path;
 
+    /* Finding the smaller capacity in the path */
     while (parent[f] != NULL) {
-        /* getting the capacity */
+        /* finding the next edge, saving it and getting the capacity */
         u = boost::vertex(f, BG);
         v = boost::vertex(parent[f], BG);
-        cap = BG[boost::edge(u, v, BG).first];
+        e = boost::edge(u, v, BG).first;
+        path.push_back(e);
+        cap = BG[e];
         /* trying to find min */
         if (delta > cap)
             delta = cap;
         /* next... */
         f = parent[f];
     }
-    return delta;
+
+    if (delta == 1000)
+        std::cerr << "ERROR: There should have been a aug path there." << std::endl;
+
+    /* Iterating over the path to saturate the edges (using delta).
+     * This is where the actual graph gets altered. */
+    for (std::vector<BoostEdge>::iterator it = path.begin(); it != path.end(); ++it) {
+        BG[*it] -= delta;
+        if (BG[*it] <= 0)
+            boost::remove_edge(*it);
+        boost::add_edge(boost::target(*it, BG), boost::source(*it, BG), delta, BG);
+    }
 }
 
 /*
@@ -104,16 +120,14 @@ int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
 
         if (avail.size() != 0) {
             /* Get the requirements */
-            j = index[avail[0]]; // TODO: (maybe) we need a way to go to the second
+            j = index[avail[0]];
             /* ADVANCE operation */
             parent[j] = i;
             i = j;
             if (i == t) {
-                /* We're there. AUGMENT operation.
-                 * We need to find the minimum residual capacity and use it to augment */
-                // TODO: we need to augment and edit the graph
-                delta = min_res_on_path(BG, parent, i);
-                /* Let's go again */
+                /* We're there. AUGMENT operation. */
+                augment_path(BG, parent, i);
+                /* Let's go from the top again */
                 i = s;
             }
         } else {
