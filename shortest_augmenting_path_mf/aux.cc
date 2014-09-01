@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <utility>
 #include <cmath>
 #include <LEDA/graph/graph.h>
 #include "boost-types.h"
@@ -26,12 +27,18 @@ void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& cap
 }
 
 /*
- * Function to convert an existing LEDA graph to BGL
+ * Function to convert an existing LEDA graph to Boost Graph format.
+ * Returns pair with nodes in the new graph that mirror provided nodes in the provided graph.
  */
-void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities)
+std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
+                                               BoostGraph& BG,
+                                               const leda::edge_array<int>& capacities,
+                                               leda::node s,
+                                               leda::node t)
 {
     leda::edge e;
     leda::node n;
+    BoostVertex first, second;
     /* A LEDA node-array of Boost vertices. */
     leda::node_array<BoostVertex> BVs(LG);
 
@@ -40,6 +47,11 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
     forall_nodes(n, LG) {
         /* Constructing vertices first. We could add properties here. */
         BVs[n] = boost::add_vertex(BG);
+        /* keeping those vertices for later */
+        if (n == s)
+            first = BVs[n];
+        if (n == t)
+            second = BVs[n];
     }
 
     /* Now attempting to add the edges between the vertices. */
@@ -47,5 +59,6 @@ void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<in
         /* We also add the corresponding capacity every time since Boost keeps them inside the graph. */
         boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG).first;
     }
-    return;
+
+    return std::make_pair(first, second);
 }

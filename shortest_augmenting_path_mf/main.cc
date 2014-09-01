@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 #include <LEDA/graph/graph.h>
 #include <LEDA/graph/graph_gen.h>
 #include <LEDA/graph/max_flow.h>
@@ -16,12 +17,12 @@
 
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
-void leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities);
-int  shortest_aug_path(BoostGraph& BG, std::vector<BoostEdge> ret_flow);
+std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities, leda::node s, leda::node t);
+int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target);
 
 /*
  * Runs benchmarks for a given graph.
- * We are printing directly to cerr in this function to avoid multiple flush()es
+ * We are printing directly to cerr in this function to avoid flush() pollution
  */
 static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
 {
@@ -31,15 +32,15 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
     leda::node s, t;
     leda::edge_array<int> flow(G);
 
-    /* Pick random source/sink nodes. TODO: user option? */
+    /* Pick random source/sink nodes. */
     s = G.choose_node();
     do {
         t = G.choose_node();
     } while (s == t);
 
-    /* Initial errands */
+    /* Initial obligations */
     std::cerr << "\t  Preparing graphs... ";
-    leda2boost(G, BG, capacities);
+    std::pair <BoostVertex, BoostVertex> Bst = leda2boost(G, BG, capacities, s, t);
     std::cerr << "Done." << std::endl;
 
     /* LEDA's internal implementation */
@@ -53,7 +54,7 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
 
     /* My implementation */
     T = leda::used_time();
-    my_flow = shortest_aug_path(BG, s, t);
+    my_flow = shortest_aug_path(BG, Bst.first, Bst.second);
     std::cerr << "\t\tCustom SAP Algorithm implementation time: " << leda::used_time(T) << std::endl;
 
     /* Testing & final errands */

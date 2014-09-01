@@ -44,7 +44,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static void augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
+static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
@@ -78,6 +78,8 @@ static void augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
             boost::remove_edge(*it);
         boost::add_edge(boost::target(*it, BG), boost::source(*it, BG), delta, BG);
     }
+
+    return delta;
 }
 
 /*
@@ -85,7 +87,8 @@ static void augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
  */
 int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
 {
-    int i, j, s, t, delta;
+    int i, j, s, t;
+    int flow = 0;
     unsigned int n = boost::num_vertices(BG);
     unsigned int m = boost::num_edges(BG);
     BoostOutEdgeIt current, next;
@@ -126,7 +129,7 @@ int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
             i = j;
             if (i == t) {
                 /* We're there. AUGMENT operation. */
-                augment_path(BG, parent, i);
+                flow += augment_path(BG, parent, i);
                 /* Let's go from the top again */
                 i = s;
             }
@@ -138,4 +141,6 @@ int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
                 i = parent[i];
         }
     }
+
+    return flow;
 }
