@@ -50,7 +50,7 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     BG.clear();
     forall_nodes(n, LG) {
         /* Constructing vertices first. We add default parent here. */
-        par_to_add.parent = -1;
+        par_to_add.parent = NULL;
         BVs[n] = boost::add_vertex(par_to_add, BG);
         /* keeping those vertices for later */
         if (n == s) {

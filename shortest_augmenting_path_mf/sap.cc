@@ -42,7 +42,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, int f)
+static int augment_path(BoostGraph& BG, BoostVertex f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
@@ -52,10 +52,10 @@ static int augment_path(BoostGraph& BG, int f)
     std::vector<BoostEdge> path;
 
     /* Finding the smaller capacity in the path */
-    while (f.parent != -1) {
+    while (BG[f].parent) {
         /* finding the next edge, saving it and getting the capacity */
         u = boost::vertex(f, BG);
-        v = boost::vertex(f.parent, BG);
+        v = boost::vertex(*(BoostVertex *)(BG[f].parent), BG);
         e = boost::edge(u, v, BG).first;
         path.push_back(e);
         cap = BG[e].cap;
@@ -63,7 +63,7 @@ static int augment_path(BoostGraph& BG, int f)
         if (delta > cap)
             delta = cap;
         /* next... */
-        f = f.parent;
+        f = *(BoostVertex *)(BG[f].parent);
     }
 
     if (delta == 1000)
@@ -116,8 +116,8 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
         if (avail.size() != 0) {
             /* Get the requirements */
             j = avail[0];
-            /* ADVANCE operation */
-            j.parent = i;
+            /* ADVANCE operation. First keeping parent pointer */
+            BG[j].parent = &i;
             i = j;
             if (i == target) {
                 /* We're there. AUGMENT operation. */
@@ -130,7 +130,7 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
             distances[i] = 1 + find_min_out_edges(boost::vertex(i, BG), distances, BG);
             /* ...and then backtrack. */
             if (i != source)
-                i = i.parent;
+                i = *(BoostVertex *)(BG[i].parent);
         }
     }
 
