@@ -33,8 +33,8 @@ void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& cap
 std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
                                                BoostGraph& BG,
                                                const leda::edge_array<int>& capacities,
-                                               leda::node s,
-                                               leda::node t)
+                                               const leda::node s,
+                                               const leda::node t)
 {
     leda::edge e;
     leda::node n;
@@ -57,7 +57,7 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     /* Now attempting to add the edges between the vertices. */
     forall_edges(e, LG) {
         /* We also add the corresponding capacity every time since Boost keeps them inside the graph. */
-        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG).first;
+        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG);
     }
 
     return std::make_pair(first, second);

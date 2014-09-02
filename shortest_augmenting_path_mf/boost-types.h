@@ -21,8 +21,7 @@ typedef boost::adjacency_list <boost::vecS,
                                // vertex properties:
                                boost::no_property,
                                // edge properties:
-                               // boost::property<boost::edge_weight_t, int> > BoostGraph;
-                               edge_attr > BoostGraph;
+                               edge_attr> BoostGraph;
 // for the vertex-edge types
 typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
 typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;

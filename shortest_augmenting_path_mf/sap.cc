@@ -21,13 +21,13 @@
 static inline int find_min_out_edges(const BoostVertex& initial,
                                      const IndexMap *index,
                                      const VerticesSizeType *cost,
-                                     const BoostGraph& G)
+                                     const BoostGraph& BG)
 {
     int value, min;
     BoostOutEdgeIt one, two;
     bool first_iteration = true;
 
-    for (boost::tie(one, two) = boost::out_edges(initial, G); one != two; ++one) {
+    for (boost::tie(one, two) = boost::out_edges(initial, BG); one != two; ++one) {
         value = cost[index[boost::target(*one)]];
         if (first_iteration) {
             min = value;
@@ -43,7 +43,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
+static int augment_path(BoostGraph& BG, const VerticesSizeType *parent, const int f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
@@ -84,7 +84,7 @@ static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
 /*
  * this file's core function
  */
-int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
+int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target)
 {
     int i, j, s, t;
     int flow = 0;
@@ -106,7 +106,7 @@ int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
     boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(t, BG),
                boost::visitor(boost::make_bfs_visitor(boost::record_distances(&distances[0],
-                                                                              boost::on_tree_edge())))); 
+                                                                              boost::on_tree_edge()))));
 
     /* getting the index, since we're working we them now, and starting main loop... */
     s = index[source];
