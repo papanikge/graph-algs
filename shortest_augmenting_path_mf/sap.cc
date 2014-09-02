@@ -92,7 +92,6 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
     int i, j, s, t;
     int flow = 0;
     unsigned int n = boost::num_vertices(BG);
-    unsigned int m = boost::num_edges(BG);
     BoostOutEdgeIt current, next;
     std::vector<BoostVertex> avail;
     /* We use an "index map" in order to easily assign IDs to vertices, and be able
@@ -107,7 +106,7 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
     std::fill_n(parent, n, -1);
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
-    boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(t, BG),
+    boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(target, BG),
                boost::visitor(boost::make_bfs_visitor(boost::record_distances(&distances[0],
                                                                               boost::on_tree_edge()))));
 
