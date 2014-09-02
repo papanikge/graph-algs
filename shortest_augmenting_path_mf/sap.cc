@@ -14,7 +14,6 @@
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/graph_utility.hpp>
-#include <boost/property_map.hpp>
 
 /*
  * Find minimum value from the target of outgoing edges of a vertex in a graph. Yeah.
@@ -53,7 +52,7 @@ static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
     std::vector<BoostEdge> path;
 
     /* Finding the smaller capacity in the path */
-    while (parent[f] != NULL) {
+    while (parent[f] != -1) {
         /* finding the next edge, saving it and getting the capacity */
         u = boost::vertex(f, BG);
         v = boost::vertex(parent[f], BG);
@@ -102,7 +101,7 @@ int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target)
     std::fill_n(distances, n, 0);
     /* ...and a similar one for the parent nodes */
     VerticesSizeType parent[n];
-    std::fill_n(parent, n, NULL); // TODO: maybe null is not allowed. in that case choose an unchosen id
+    std::fill_n(parent, n, -1);
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
     boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(t, BG),
