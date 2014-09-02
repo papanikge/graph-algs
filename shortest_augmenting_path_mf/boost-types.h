@@ -10,6 +10,10 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+struct edge_attr {
+    int cap;
+};
+
 // main graph type
 typedef boost::adjacency_list <boost::vecS,
                                boost::vecS,
@@ -17,7 +21,8 @@ typedef boost::adjacency_list <boost::vecS,
                                // vertex properties:
                                boost::no_property,
                                // edge properties:
-                               boost::property<boost::edge_weight_t, int> > BoostGraph;
+                               // boost::property<boost::edge_weight_t, int> > BoostGraph;
+                               edge_attr > BoostGraph;
 // for the vertex-edge types
 typedef boost::graph_traits<BoostGraph>::vertex_descriptor BoostVertex;
 typedef boost::graph_traits<BoostGraph>::edge_descriptor   BoostEdge;

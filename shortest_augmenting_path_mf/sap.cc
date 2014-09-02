@@ -58,7 +58,7 @@ static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
         v = boost::vertex(parent[f], BG);
         e = boost::edge(u, v, BG).first;
         path.push_back(e);
-        cap = BG[e];
+        cap = BG[e].cap;
         /* trying to find min */
         if (delta > cap)
             delta = cap;
@@ -72,8 +72,8 @@ static int augment_path(BoostGraph& BG, VerticesSizeType *parent, int f)
     /* Iterating over the path to saturate the edges (using delta).
      * This is where the actual graph gets altered. */
     for (std::vector<BoostEdge>::iterator it = path.begin(); it != path.end(); ++it) {
-        BG[*it] -= delta;
-        if (BG[*it] <= 0)
+        BG[*it].cap -= delta;
+        if (BG[*it].cap <= 0)
             boost::remove_edge(*it);
         boost::add_edge(boost::target(*it, BG), boost::source(*it, BG), delta, BG);
     }
