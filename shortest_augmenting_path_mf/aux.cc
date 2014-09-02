@@ -40,6 +40,7 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     leda::node n;
     BoostVertex first, second;
     edge_attr cap_to_add;
+    vertex_attr par_to_add;
     /* safety lock */
     bool got_it = false;
     /* A LEDA node-array of Boost vertices. */
@@ -48,8 +49,9 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     /* Purge the old contents and start constructing the Boost mirror. */
     BG.clear();
     forall_nodes(n, LG) {
-        /* Constructing vertices first. We could add properties here. */
-        BVs[n] = boost::add_vertex(BG);
+        /* Constructing vertices first. We add default parent here. */
+        par_to_add.parent = -1;
+        BVs[n] = boost::add_vertex(par_to_add, BG);
         /* keeping those vertices for later */
         if (n == s) {
             first = BVs[n];
