@@ -42,7 +42,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, const VerticesSizeType *parent, int f)
+static int augment_path(BoostGraph& BG, const int *parent, int f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
@@ -98,11 +98,11 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
      * to use regular arrays. Boost visitors use regular arrays and they are simpler
      * than using Propery Maps */
     IndexMap index = boost::get(boost::vertex_index, BG);
-    /* We'll just use a regular array to store the distances for the sake of simplicity. */
+    /* We'll just use an vertex-index array to store the distances for the sake of simplicity. */
     VerticesSizeType distances[n];
     std::fill_n(distances, n, 0);
-    /* ...and a similar one for the parent nodes */
-    VerticesSizeType parent[n];
+    /* And a regular one for the parent nodes */ // TODO: remove index-BS
+    int parent[n];
     std::fill_n(parent, n, -1);
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
