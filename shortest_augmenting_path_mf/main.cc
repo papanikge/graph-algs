@@ -18,7 +18,7 @@
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
 std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities, leda::node s, leda::node t);
-int shortest_aug_path(BoostGraph& BG, BoostVertex& source, BoostVertex& target);
+int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target);
 
 /*
  * Runs benchmarks for a given graph.

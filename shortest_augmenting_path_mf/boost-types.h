@@ -17,7 +17,7 @@ struct edge_attr {
 // main graph type
 typedef boost::adjacency_list <boost::vecS,
                                boost::vecS,
-                               boost::directedS,
+                               boost::bidirectionalS,
                                // vertex properties:
                                boost::no_property,
                                // edge properties:

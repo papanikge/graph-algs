@@ -19,8 +19,7 @@
  * Find minimum value from the target of outgoing edges of a vertex in a graph. Yeah.
  */
 static inline int find_min_out_edges(const BoostVertex& initial,
-                                     const IndexMap *index,
-                                     const VerticesSizeType *cost,
+                                     VerticesSizeType *cost,
                                      const BoostGraph& BG)
 {
     int value, min;
@@ -28,7 +27,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
     bool first_iteration = true;
 
     for (boost::tie(one, two) = boost::out_edges(initial, BG); one != two; ++one) {
-        value = cost[index[boost::target(*one)]];
+        value = cost[boost::target(*one, BG)];
         if (first_iteration) {
             min = value;
             first_iteration = false;
@@ -43,12 +42,13 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, const VerticesSizeType *parent, const int f)
+static int augment_path(BoostGraph& BG, const VerticesSizeType *parent, int f)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
     BoostEdge e;
     BoostVertex u, v;
+    edge_attr to_add;
     std::vector<BoostEdge> path;
 
     /* Finding the smaller capacity in the path */
@@ -72,10 +72,13 @@ static int augment_path(BoostGraph& BG, const VerticesSizeType *parent, const in
     /* Iterating over the path to saturate the edges (using delta).
      * This is where the actual graph gets altered. */
     for (std::vector<BoostEdge>::iterator it = path.begin(); it != path.end(); ++it) {
+        /* reduce the existing one */
         BG[*it].cap -= delta;
         if (BG[*it].cap <= 0)
-            boost::remove_edge(*it);
-        boost::add_edge(boost::target(*it, BG), boost::source(*it, BG), delta, BG);
+            boost::remove_edge(*it, BG);
+        /* create an opposite one */
+        to_add.cap = delta;
+        boost::add_edge(boost::target(*it, BG), boost::source(*it, BG), to_add, BG);
     }
 
     return delta;
@@ -116,7 +119,7 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
         /* Iterating through all out going edges of current node */
         for (boost::tie(current, next) = boost::out_edges(boost::vertex(i, BG), BG); current != next; ++current) {
             /* Selecting only admissible ones */
-            if (distances[i] == distances[boost::target(*current)] + 1)
+            if (distances[i] == distances[boost::target(*current, BG)] + 1)
                 avail.push_back(boost::target(*current, BG));
         }
 
@@ -134,7 +137,7 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
             }
         } else {
             /* RETREAT operation. Relabel first. */
-            distances[i] = 1 + find_min_out_edges(boost::vertex(i, BG), index, distances, BG);
+            distances[i] = 1 + find_min_out_edges(boost::vertex(i, BG), distances, BG);
             /* ...and then backtrack. */
             if (i != s)
                 i = parent[i];

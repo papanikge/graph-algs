@@ -39,6 +39,7 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     leda::edge e;
     leda::node n;
     BoostVertex first, second;
+    edge_attr cap_to_add;
     /* A LEDA node-array of Boost vertices. */
     leda::node_array<BoostVertex> BVs(LG);
 
@@ -57,7 +58,8 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     /* Now attempting to add the edges between the vertices. */
     forall_edges(e, LG) {
         /* We also add the corresponding capacity every time since Boost keeps them inside the graph. */
-        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], capacities[e], BG);
+        cap_to_add.cap = capacities[e];
+        boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], cap_to_add, BG);
     }
 
     return std::make_pair(first, second);
