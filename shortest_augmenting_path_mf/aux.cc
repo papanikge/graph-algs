@@ -40,8 +40,6 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
     leda::node n;
     BoostVertex first, second;
     edge_attr cap_to_add;
-    /* safety lock */
-    bool got_it = false;
     /* A LEDA node-array of Boost vertices. */
     leda::node_array<BoostVertex> BVs(LG);
 
@@ -51,10 +49,8 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
         /* Constructing vertices first. We could add properties here. */
         BVs[n] = boost::add_vertex(BG);
         /* keeping those vertices for later */
-        if (n == s) {
+        if (n == s)
             first = BVs[n];
-            got_it = true;
-        }
         if (n == t)
             second = BVs[n];
     }
@@ -66,10 +62,5 @@ std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG,
         boost::add_edge(BVs[LG.source(e)], BVs[LG.target(e)], cap_to_add, BG);
     }
 
-    if (got_it == true)
-        return std::make_pair(first, second);
-    else {
-        std::cerr << "ERROR: What the fuck == does not work for leda::node??" << std::endl;
-        exit(-1);
-    }
+    return std::make_pair(first, second);
 }
