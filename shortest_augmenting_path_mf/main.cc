@@ -69,6 +69,7 @@ int main(int argc, char **argv)
 {
     int i, n;
     leda::graph G;
+    leda::node s, u, t;
     leda::edge_array<int> capacities;
     unsigned int N[] = { 1000, 3000, 5000 };
 
@@ -85,23 +86,14 @@ int main(int argc, char **argv)
 
         benchmark(G, capacities);
     } else {
-        /* Default values in the nodes */
-        std::cout << "Give -n <number of nodes> if you want a custom amount\n";
-        std::cout << "Moving on with the default values...\n\n";
-
-        std::cout << ">>> Random graphs...\n";
-        for (i = 0; i < 3; i++) {
-            std::cout << "\tGenerating random graph with " << N[i] << " nodes... ";
-            std::cout.flush();
-            leda::random_simple_loopfree_graph(G, N[i], N[i]*log10(N[i]));
-            generate_random_capacities(G, capacities);
-            std::cout << "Done." << std::endl;
-
-            benchmark(G, capacities);
-
-            /* cleaning up for the next iteration */
-            G.clear();
-        }
+        s = G.new_node();
+        u = G.new_node();
+        t = G.new_node();
+        G.new_edge(s, u);
+        G.new_edge(u, t);
+        G.new_edge(s, t);
+        generate_random_capacities(G, capacities);
+        benchmark(G, capacities);
     }
     return 0;
 }
