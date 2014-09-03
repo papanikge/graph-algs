@@ -42,28 +42,25 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, BoostVertex f)
+static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex> parent)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
     BoostEdge e;
-    BoostVertex u, v;
     edge_attr to_add;
     std::vector<BoostEdge> path;
 
     /* Finding the smaller capacity in the path */
-    while (BG[f].parent) {
+    while (parent[f]) {
         /* finding the next edge, saving it and getting the capacity */
-        u = boost::vertex(f, BG);
-        v = boost::vertex(*(BoostVertex *)(BG[f].parent), BG);
-        e = boost::edge(u, v, BG).first;
+        e = boost::edge(f, parent[f], BG).first;
         path.push_back(e);
         cap = BG[e].cap;
         /* trying to find min */
         if (delta > cap)
             delta = cap;
         /* next... */
-        f = *(BoostVertex *)(BG[f].parent);
+        f = parent[f];
     }
 
     if (delta == 1000)
@@ -97,17 +94,20 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
     /* We'll just use an vertex-index array to store the distances for the sake of simplicity. */
     VerticesSizeType distances[n];
     std::fill_n(distances, n, 0);
+    /* ...and a regular vector for the parents */
+    std::vector<BoostVertex> parent(n); // what is it filled with?
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
-    boost::breadth_first_search(boost::make_reverse_graph(BG), boost::vertex(target, BG),
+    boost::breadth_first_search(boost::make_reverse_graph(BG), target,
                boost::visitor(boost::make_bfs_visitor(boost::record_distances(&distances[0],
                                                                               boost::on_tree_edge()))));
 
     /* Starting main loop... */
     i = source;
     while (distances[source] < n) {
+        avail.clear();
         /* Iterating through all out going edges of current node */
-        for (boost::tie(current, next) = boost::out_edges(boost::vertex(i, BG), BG); current != next; ++current) {
+        for (boost::tie(current, next) = boost::out_edges(i, BG); current != next; ++current) {
             /* Selecting only admissible ones */
             if (distances[i] == distances[boost::target(*current, BG)] + 1)
                 avail.push_back(boost::target(*current, BG));
@@ -117,20 +117,20 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
             /* Get the requirements */
             j = avail[0];
             /* ADVANCE operation. First keeping parent pointer */
-            BG[j].parent = &i;
+            parent[j] = i;
             i = j;
             if (i == target) {
                 /* We're there. AUGMENT operation. */
-                flow += augment_path(BG, i);
+                flow += augment_path(BG, i, parent);
                 /* Let's go from the top again */
                 i = source;
             }
         } else {
             /* RETREAT operation. Relabel first. */
-            distances[i] = 1 + find_min_out_edges(boost::vertex(i, BG), distances, BG);
+            distances[i] = 1 + find_min_out_edges(i, distances, BG);
             /* ...and then backtrack. */
             if (i != source)
-                i = *(BoostVertex *)(BG[i].parent);
+                i = parent[i];
         }
     }
 
