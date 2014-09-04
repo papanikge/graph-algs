@@ -22,19 +22,14 @@ static inline int find_min_out_edges(const BoostVertex& initial,
                                      VerticesSizeType *cost,
                                      const BoostGraph& BG)
 {
-    int value, min;
+    int value;
+    int min = 1000; // something big so we it will be assigned initialy
     BoostOutEdgeIt one, two;
-    bool first_iteration = true;
 
     for (boost::tie(one, two) = boost::out_edges(initial, BG); one != two; ++one) {
         value = cost[boost::target(*one, BG)];
-        if (first_iteration) {
+        if (value < min)
             min = value;
-            first_iteration = false;
-        } else {
-            if (value < min)
-                min = value;
-        }
     }
     return min;
 }
@@ -42,7 +37,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 /*
  * Tracing the path back to the source, finding min residual capacity and augmenting it.
  */
-static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex> parent)
+static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>& parent)
 {
     int cap;
     int delta = 1000;  /* something big so we can find smaller values */
@@ -51,9 +46,9 @@ static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>
     std::vector<BoostEdge> path;
 
     /* Finding the smaller capacity in the path */
-    while (parent[f]) {
+    while (parent[f] != BoostGraph::null_vertex()) {
         /* finding the next edge, saving it and getting the capacity */
-        e = boost::edge(f, parent[f], BG).first;
+        e = boost::edge(parent[f], f, BG).first;
         path.push_back(e);
         cap = BG[e].cap;
         /* trying to find min */
@@ -95,7 +90,8 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
     VerticesSizeType distances[n];
     std::fill_n(distances, n, 0);
     /* ...and a regular vector for the parents */
-    std::vector<BoostVertex> parent(n); // what is it filled with?
+    std::vector<BoostVertex> parent(n);
+    parent[source] = BoostGraph::null_vertex(); // so we can find it later
 
     /* Getting the distance labels by reversed BFS. Creating the visitor inline. */
     boost::breadth_first_search(boost::make_reverse_graph(BG), target,
