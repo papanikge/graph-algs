@@ -17,6 +17,7 @@
 
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
+void delete_direct_vertices(leda::graph& G, const leda::node source, const leda::node target);
 std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities, leda::node s, leda::node t);
 int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target);
 
@@ -24,7 +25,7 @@ int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVert
  * Runs benchmarks for a given graph.
  * We are printing directly to cerr in this function to avoid flush() pollution
  */
-static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
+static void benchmark(leda::graph& G, leda::edge_array<int>& capacities)
 {
     float T;
     int leda_flow, my_flow;
@@ -40,6 +41,7 @@ static void benchmark(const leda::graph& G, leda::edge_array<int>& capacities)
 
     /* Initial obligations */
     std::cerr << "\t  Preparing graphs... ";
+    delete_direct_vertices(G, s, t);
     std::pair <BoostVertex, BoostVertex> Bst = leda2boost(G, BG, capacities, s, t);
     std::cerr << "Done." << std::endl;
 

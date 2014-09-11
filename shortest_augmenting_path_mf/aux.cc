@@ -10,7 +10,7 @@
 #include "boost-types.h"
 
 /*
- * Fill in the capacities vector of an already generated graph
+ * Fill in the capacities vector of an already generated graph.
  */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities)
 {
@@ -18,9 +18,22 @@ void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& cap
 
     srand(time(NULL));
     capacities.init(G, 0);
-    forall_edges(e,G) {
+    forall_edges(e, G)
         capacities[e] = rand() % (MAXIMUM_CAP + 1);
-    }
+    return;
+}
+
+/*
+ * Remove edges that go directly from source to target, to assist the implementation
+ * against some edge cases and to make the graphs more difficult.
+ */
+void delete_direct_vertices(leda::graph& G, const leda::node source, const leda::node target)
+{
+    leda::edge e;
+
+    forall_edges(e, G)
+        if ((G.source(e) == source) && (G.target(e) == target))
+            G.del_edge(e);
     return;
 }
 
