@@ -23,7 +23,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
                                      const BoostGraph& BG)
 {
     int value;
-    int min = 1000; // something big so we it will be assigned initialy
+    int min = 30000; // Something big so we it will be assigned initialy
     BoostOutEdgeIt one, two;
 
     for (boost::tie(one, two) = boost::out_edges(initial, BG); one != two; ++one) {
@@ -40,7 +40,7 @@ static inline int find_min_out_edges(const BoostVertex& initial,
 static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>& parent)
 {
     int cap;
-    int delta = 1000;  /* something big so we can find smaller values */
+    int delta = MAXIMUM_CAP + 1; // Something big so we can find smaller values
     BoostEdge e;
     edge_attr to_add;
     std::vector<BoostEdge> path;
@@ -58,7 +58,7 @@ static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>
         f = parent[f];
     }
 
-    if (delta == 1000)
+    if (delta == (MAXIMUM_CAP + 1))
         std::cerr << "ERROR: There should have been a aug path there." << std::endl;
 
     /* Iterating over the path to saturate the edges (using delta).

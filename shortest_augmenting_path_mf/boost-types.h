@@ -10,6 +10,9 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+#include <climits>
+#define MAXIMUM_CAP (INT_MAX - 1)
+
 struct edge_attr {
     int cap;
 };

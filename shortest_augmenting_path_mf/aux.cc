@@ -9,8 +9,6 @@
 #include <LEDA/graph/graph.h>
 #include "boost-types.h"
 
-#define MAXIMUM_CAP 100
-
 /*
  * Fill in the capacities vector of an already generated graph
  */
