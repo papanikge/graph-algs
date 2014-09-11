@@ -15,11 +15,16 @@
 #include <LEDA/system/timer.h>
 #include "boost-types.h"
 
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+
 /* Prototypes */
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
 void delete_direct_vertices(leda::graph& G, const leda::node source, const leda::node target);
 std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities, leda::node s, leda::node t);
-int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target);
+long edmonds_karp_flow(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target);
 
 /*
  * Runs benchmarks for a given graph.
@@ -40,7 +45,7 @@ static void benchmark(leda::graph& G, leda::edge_array<int>& capacities)
     } while (s == t);
 
     /* Initial obligations */
-    std::cerr << "\t  Preparing graphs... ";
+    std::cerr << "  Preparing graphs... ";
     delete_direct_vertices(G, s, t);
     std::pair <BoostVertex, BoostVertex> Bst = leda2boost(G, BG, capacities, s, t);
     std::cerr << "Done." << std::endl;
@@ -48,22 +53,22 @@ static void benchmark(leda::graph& G, leda::edge_array<int>& capacities)
     /* LEDA's internal implementation */
     T = leda::used_time();
     leda_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
-    std::cerr << "\t\tLEDA's Calculation time: " << leda::used_time(T);
+    std::cerr << "\tLEDA's Calculation time: " << leda::used_time(T);
     if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
-        std::cerr << "... [Correct]" << std::endl;
+        std::cerr << KGRN << "... [Correct]" << KNRM << std::endl;
     else
-        std::cerr << "... [Wrong]" << std::endl;
+        std::cerr << KRED << "... [Wrong]" << KNRM << std::endl;
 
     /* My implementation */
     T = leda::used_time();
-    my_flow = shortest_aug_path(BG, Bst.first, Bst.second);
-    std::cerr << "\t\tCustom SAP Algorithm implementation time: " << leda::used_time(T) << std::endl;
+    my_flow = edmonds_karp_flow(BG, Bst.first, Bst.second);
+    std::cerr << "\tCustom SAP Algorithm implementation time: " << leda::used_time(T) << std::endl;
 
     /* Testing & final errands */
     if (my_flow == leda_flow)
-        std::cerr << "\t\t[Return values match!]" << std::endl;
+        std::cerr << KGRN << "\t[Return values match!]" << KNRM << std::endl;
     else
-        std::cerr << "\t\t[Return values do NOT match!]" << std::endl;
+        std::cerr << KRED << "\t[Return values do NOT match!]" << KNRM << std::endl;
     return;
 }
 
@@ -91,9 +96,9 @@ int main(int argc, char **argv)
         std::cout << "Give -n <number of nodes> if you want a custom amount\n";
         std::cout << "Moving on with the default values...\n\n";
 
-        std::cout << ">>> Random graphs...\n";
+        std::cout << KYEL << ">>> Random graphs..." << KNRM << std::endl;
         for (i = 0; i < 3; i++) {
-            std::cout << "\tGenerating random graph with " << N[i] << " nodes... ";
+            std::cout << "Generating random graph with " << N[i] << " nodes... ";
             std::cout.flush();
             leda::random_simple_loopfree_graph(G, N[i], N[i]*log10(N[i]));
             generate_random_capacities(G, capacities);
@@ -104,6 +109,8 @@ int main(int argc, char **argv)
             /* cleaning up for the next iteration */
             G.clear();
         }
+        std::cout << KYEL << ">>> Hard graphs..." << KNRM << std::endl;
+        // TODO
     }
     return 0;
 }

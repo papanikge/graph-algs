@@ -79,9 +79,9 @@ static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>
 /*
  * this file's core function
  */
-int shortest_aug_path(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target)
+long edmonds_karp_flow(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target)
 {
-    int flow = 0;
+    long flow = 0;
     unsigned int n = boost::num_vertices(BG);
     BoostVertex i, j;
     BoostOutEdgeIt current, next;
