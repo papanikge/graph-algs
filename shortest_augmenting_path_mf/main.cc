@@ -21,33 +21,29 @@
 #define KYEL  "\x1B[33m"
 
 /* Prototypes */
+std::pair<leda::node, leda::node> generate_hard_graph(leda::graph& G, unsigned int how_many, leda::edge_array<int>& capacities);
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
 void delete_direct_vertices(leda::graph& G, const leda::node source, const leda::node target);
 std::pair<BoostVertex, BoostVertex> leda2boost(const leda::graph& LG, BoostGraph& BG, const leda::edge_array<int>& capacities, leda::node s, leda::node t);
 long edmonds_karp_flow(BoostGraph& BG, const BoostVertex& source, const BoostVertex& target);
 
 /*
- * Runs benchmarks for a given graph.
- * We are printing directly to cerr in this function to avoid flush() pollution
+ * Runs benchmarks for a given graph with the given source and target of course.
+ * Is responsible for converting the graph to BGL.
+ * We are printing directly to cerr in this function to avoid flush() pollution.
  */
-static void benchmark(leda::graph& G, leda::edge_array<int>& capacities)
+static void benchmark(leda::graph& G, leda::edge_array<int>& capacities, leda::node s, leda::node t)
 {
     float T;
-    int leda_flow, my_flow;
+    long leda_flow, my_flow;
     BoostGraph BG;
-    leda::node s, t;
     leda::edge_array<int> flow(G);
-
-    /* Pick random source/sink nodes. */
-    s = G.choose_node();
-    do {
-        t = G.choose_node();
-    } while (s == t);
+    std::pair <BoostVertex, BoostVertex> Bst;
 
     /* Initial obligations */
     std::cerr << "  Preparing graphs... ";
     delete_direct_vertices(G, s, t);
-    std::pair <BoostVertex, BoostVertex> Bst = leda2boost(G, BG, capacities, s, t);
+    Bst = leda2boost(G, BG, capacities, s, t);
     std::cerr << "Done." << std::endl;
 
     /* LEDA's internal implementation */
@@ -72,11 +68,28 @@ static void benchmark(leda::graph& G, leda::edge_array<int>& capacities)
     return;
 }
 
+/*
+ * Finds source and target randomly and calls benchmark()
+ */
+static void find_nodes_and_benchmark(leda::graph& G, leda::edge_array<int>& capacities)
+{
+    leda::node s, t;
+
+    /* Pick random source/sink nodes. */
+    s = G.choose_node();
+    do {
+        t = G.choose_node();
+    } while (s == t);
+
+    benchmark(G, capacities, s, t);
+}
+
 int main(int argc, char **argv)
 {
     int i, n;
     leda::graph G;
     leda::edge_array<int> capacities;
+    std::pair<leda::node, leda::node> p;
     unsigned int N[] = { 1000, 3000, 5000 };
 
     std::cout << "\n-=-=-=-=- Shortest Augmenting Path MF Algorithm Benchmarking -=-=-=-=-\n";
@@ -90,7 +103,7 @@ int main(int argc, char **argv)
         if (G.is_undirected())
             std::cerr << "BUG! Graph is undirected!" << std::endl;
 
-        benchmark(G, capacities);
+        find_nodes_and_benchmark(G, capacities);
     } else {
         /* Default values in the nodes */
         std::cout << "Give -n <number of nodes> if you want a custom amount\n";
@@ -104,13 +117,26 @@ int main(int argc, char **argv)
             generate_random_capacities(G, capacities);
             std::cout << "Done." << std::endl;
 
-            benchmark(G, capacities);
+            find_nodes_and_benchmark(G, capacities);
 
             /* cleaning up for the next iteration */
             G.clear();
         }
+        N[0] = 200;
+        N[1] = 400;
+        N[2] = 600;
         std::cout << KYEL << ">>> Hard graphs..." << KNRM << std::endl;
-        // TODO
+        for (i = 0; i < 3; i++) {
+            std::cout << "Generating graph with " << N[i] << " nodes... ";
+            std::cout.flush();
+            p = generate_hard_graph(G, N[i], capacities);
+            std::cout << "Done." << std::endl;
+
+            benchmark(G, capacities, p.first, p.second);
+
+            /* cleaning up for the next iteration */
+            G.clear();
+        }
     }
     return 0;
 }

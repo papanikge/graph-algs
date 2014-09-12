@@ -5,7 +5,6 @@
  */
 
 #include <cstdlib>
-#include <ctime>
 #include <vector>
 #include <utility>
 #include <algorithm>
@@ -59,7 +58,7 @@ static int augment_path(BoostGraph& BG, BoostVertex& f, std::vector<BoostVertex>
     }
 
     if (delta == (MAXIMUM_CAP + 1))
-        std::cerr << "ERROR: There should have been a aug path there." << std::endl;
+        std::cerr << "ERROR: There should have been an aug path there." << std::endl;
 
     /* Iterating over the path to saturate the edges (using delta).
      * This is where the actual graph gets altered. */
