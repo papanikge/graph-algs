@@ -20,6 +20,9 @@
 #define KGRN  "\x1B[32m"
 #define KYEL  "\x1B[33m"
 
+/* Global self-explanatory debug variable */
+static bool debug = false;
+
 /* Prototypes */
 std::pair<leda::node, leda::node> generate_hard_graph(leda::graph& G, unsigned int how_many, leda::edge_array<int>& capacities);
 void generate_random_capacities(const leda::graph& G, leda::edge_array<int>& capacities);
@@ -50,10 +53,14 @@ static void benchmark(leda::graph& G, leda::edge_array<int>& capacities, leda::n
     T = leda::used_time();
     leda_flow = leda::MAX_FLOW(G, s, t, capacities, flow);
     std::cerr << "\tLEDA's Calculation time: " << leda::used_time(T);
-    if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
-        std::cerr << KGRN << "... [Correct]" << KNRM << std::endl;
-    else
-        std::cerr << KRED << "... [Wrong]" << KNRM << std::endl;
+    if (debug) {
+        if (CHECK_MAX_FLOW(G, s, t, capacities, flow))
+            std::cerr << KGRN << "... [Correct]" << KNRM << std::endl;
+        else
+            std::cerr << KRED << "... [Wrong]" << KNRM << std::endl;
+    } else {
+        std::cerr << std::endl;
+    }
 
     /* My implementation */
     T = leda::used_time();
@@ -61,10 +68,12 @@ static void benchmark(leda::graph& G, leda::edge_array<int>& capacities, leda::n
     std::cerr << "\tCustom SAP Algorithm implementation time: " << leda::used_time(T) << std::endl;
 
     /* Testing & final errands */
-    if (my_flow == leda_flow)
-        std::cerr << KGRN << "\t[Return values match!]" << KNRM << std::endl;
-    else
-        std::cerr << KRED << "\t[Return values do NOT match!]" << KNRM << std::endl;
+    if (debug) {
+        if (my_flow == leda_flow)
+            std::cerr << KGRN << "\t[Return values match!]" << KNRM << std::endl;
+        else
+            std::cerr << KRED << "\t[Return values do NOT match!]" << KNRM << std::endl;
+    }
     return;
 }
 
@@ -81,22 +90,24 @@ static void find_nodes_and_benchmark(leda::graph& G, leda::edge_array<int>& capa
         t = G.choose_node();
     } while (s == t);
 
-    benchmark(G, capacities, s, t);
+    return benchmark(G, capacities, s, t);
 }
 
 int main(int argc, char **argv)
 {
-    int i, n;
+    int i, n, m;
     leda::graph G;
     leda::edge_array<int> capacities;
     std::pair<leda::node, leda::node> p;
     unsigned int N[] = { 1000, 3000, 5000 };
 
     std::cout << "\n-=-=-=-=- Shortest Augmenting Path MF Algorithm Benchmarking -=-=-=-=-\n";
-    if (argc > 2 && !strcmp(argv[1], "-n")) {
-        /* Custom nodes from the command line */
+    if (argc == 5 && !strcmp(argv[1], "-n") && !strcmp(argv[3], "-m")) {
+        /* Custom nodes and edges from the command line */
         n = atoi(argv[2]);
-        leda::random_simple_loopfree_graph(G, n, n*log10(n));
+        m = atoi(argv[4]);
+        debug = true;
+        leda::random_simple_loopfree_graph(G, n, m);
         generate_random_capacities(G, capacities);
 
         /* Safety check */
@@ -106,7 +117,7 @@ int main(int argc, char **argv)
         find_nodes_and_benchmark(G, capacities);
     } else {
         /* Default values in the nodes */
-        std::cout << "Give -n <number of nodes> if you want a custom amount\n";
+        std::cout << "Give -n <number of nodes> -m <number of edges> if you want a custom amount.\n";
         std::cout << "Moving on with the default values...\n\n";
 
         std::cout << KYEL << ">>> Random graphs..." << KNRM << std::endl;
