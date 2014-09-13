@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     leda::graph G;
     leda::edge_array<int> capacities;
     std::pair<leda::node, leda::node> p;
-    unsigned int N[] = { 1000, 3000, 5000 };
+    unsigned int N[] = { 8000, 15000, 30000 };
 
     std::cout << "\n-=-=-=-=- Shortest Augmenting Path MF Algorithm Benchmarking -=-=-=-=-\n";
     if (argc == 5 && !strcmp(argv[1], "-n") && !strcmp(argv[3], "-m")) {
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
         for (i = 0; i < 3; i++) {
             std::cout << "Generating random graph with " << N[i] << " nodes... ";
             std::cout.flush();
-            leda::random_simple_loopfree_graph(G, N[i], N[i]*log10(N[i]));
+            leda::random_simple_loopfree_graph(G, N[i], N[i]*2);
             generate_random_capacities(G, capacities);
             std::cout << "Done." << std::endl;
 

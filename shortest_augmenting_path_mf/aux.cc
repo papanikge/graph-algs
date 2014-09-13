@@ -6,7 +6,6 @@
 #include <iostream>
 #include <utility>
 #include <ctime>
-#include <cmath>
 #include <LEDA/graph/graph.h>
 #include "boost-types.h"
 
