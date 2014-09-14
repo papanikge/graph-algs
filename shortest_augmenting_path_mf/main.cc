@@ -133,9 +133,9 @@ int main(int argc, char **argv)
             /* cleaning up for the next iteration */
             G.clear();
         }
-        N[0] = 200;
-        N[1] = 400;
-        N[2] = 600;
+        N[0] = 100;
+        N[1] = 150;
+        N[2] = 200;
         std::cout << KYEL << ">>> Hard graphs..." << KNRM << std::endl;
         for (i = 0; i < 3; i++) {
             std::cout << "Generating graph with " << N[i] << " nodes... ";
